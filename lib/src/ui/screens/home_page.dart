@@ -1,0 +1,142 @@
+import 'package:flutter/material.dart';
+import 'package:my_mangas/src/data/manga_repository.dart';
+import 'package:my_mangas/src/models/manga_model.dart';
+import 'package:my_mangas/src/ui/components/item_card.dart';
+import 'package:my_mangas/src/ui/screens/manipulation_page.dart';
+
+class HomePage extends StatefulWidget {
+  HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  late Future<List<MangaModel>> _mangasFuture;
+  final DateTime nowDate = DateTime.now();
+  final MangaRepository _mangaRepository = MangaRepository();
+  final TextEditingController _searchController = TextEditingController();
+  List<MangaModel> _filteredMangas = [];
+  List<MangaModel> _allMangasList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _findMangas();
+    _searchController.addListener(() {
+      _filterMangas(_searchController.text);
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(() {
+      _filterMangas(_searchController.text);
+    });
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _sortMangasByDate(List<MangaModel> mangas) {
+    mangas.sort((a, b) => b.lastRead.compareTo(a.lastRead));
+  }
+
+  void _findMangas() {
+    _mangasFuture = _mangaRepository.getAllMangas();
+    _mangasFuture.then((mangas) {
+      setState(() {
+        _allMangasList = mangas;
+        _filteredMangas = _allMangasList;
+        _sortMangasByDate(_filteredMangas);
+      });
+    });
+  }
+
+  void _filterMangas(String filter) {
+    setState(() {
+      if (filter.isNotEmpty) {
+        _filteredMangas = _allMangasList.where((manga) {
+          return manga.title.toLowerCase().contains(filter.toLowerCase());
+        }).toList();
+      } else {
+        _filteredMangas = _allMangasList;
+      }
+      _sortMangasByDate(_filteredMangas);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ManipulationPage(dateNow: nowDate),
+            ),
+          );
+          _findMangas();
+        },
+        child: const Icon(Icons.add),
+      ),
+      drawer: _tegFilter(),
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.tertiary,
+        title: TextField(
+          controller: _searchController,
+          decoration: const InputDecoration(
+            hintText: 'Buscar...',
+            border: InputBorder.none,
+            hintStyle: TextStyle(color: Colors.white54),
+          ),
+        ),
+      ),
+      body: FutureBuilder<List<MangaModel>>(
+        future: _mangasFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('Adicione um novo manga!'));
+          } else {
+            return ListView.builder(
+              itemCount: _filteredMangas.length,
+              itemBuilder: (context, index) {
+                return ItemCard(
+                  manga: _filteredMangas[index],
+                  nowDate: nowDate,
+                  findMangas: _findMangas,
+                );
+              },
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _tegFilter() {
+    // Implemente o filtro de tags aqui
+    return Drawer(
+      child: ListView(
+        children: <Widget>[
+          const DrawerHeader(
+            decoration: BoxDecoration(
+              color: Colors.blue,
+            ),
+            child: Text('Filtros de Tags'),
+          ),
+          ListTile(
+            title: Text('Tag 1'),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
