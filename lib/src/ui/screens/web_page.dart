@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:my_mangas/src/data/manga_repository.dart';
 import 'package:my_mangas/src/models/manga_model.dart';
+import 'package:my_mangas/src/ui/components/drawer_menu_header.dart';
+import 'package:my_mangas/src/ui/components/update_fields_dialog.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WebPage extends StatefulWidget {
@@ -16,20 +18,13 @@ class WebPage extends StatefulWidget {
 class _WebPageState extends State<WebPage> {
   late final WebViewController _controller;
   final MangaRepository _repository = MangaRepository();
-  final _formKey = GlobalKey<FormState>();
-  late TextEditingController _tcharContr;
-  late TextEditingController _rchatContr;
+
   late MangaModel _mangaModel;
 
   @override
   void initState() {
     super.initState();
     _mangaModel = widget.manga;
-    _tcharContr =
-        TextEditingController(text: _mangaModel.totalChapters.toString());
-    _rchatContr =
-        TextEditingController(text: _mangaModel.chaptersRead.toString());
-
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..loadRequest(
@@ -41,7 +36,7 @@ class _WebPageState extends State<WebPage> {
   Widget build(BuildContext context) {
     final title = _mangaModel.title;
     return Scaffold(
-      endDrawer: _webViewMenu(title),
+      endDrawer: _webViewMenu(title, _controller),
       appBar: AppBar(
         title: Text(title),
       ),
@@ -51,7 +46,7 @@ class _WebPageState extends State<WebPage> {
     );
   }
 
-  Widget _webViewMenu(String title) {
+  Widget _webViewMenu(String title, WebViewController controller) {
     final width = MediaQuery.of(context).size.width;
     return SizedBox(
       width: (width * (2 / 3)),
@@ -60,21 +55,22 @@ class _WebPageState extends State<WebPage> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            DrawerHeader(
-              child: Text(title),
+            DrawerMenuHeader(
+              controller: _controller,
+              title: title,
             ),
             Card(
               child: ListTile(
                 title: Text('Total de capitulos: ${_mangaModel.totalChapters}'),
                 onTap: () {
-                  updateFilds(context);
+                  _showUpdateFieldsDialog(context);
                 },
               ),
             ),
             Card(
               child: ListTile(
                 onTap: () {
-                  updateFilds(context);
+                  _showUpdateFieldsDialog(context);
                 },
                 title: Text('Capitulos Lidos: ${_mangaModel.chaptersRead}'),
               ),
@@ -83,7 +79,7 @@ class _WebPageState extends State<WebPage> {
               child: ListTile(
                 title: Center(child: Text('Salvar URL')),
                 subtitle: Text(
-                  'atual :${_mangaModel.urlManga ?? "não tem"}',
+                  'atual: ${_mangaModel.urlManga ?? "não tem"}',
                   maxLines: 2,
                 ),
                 onTap: saveUrl,
@@ -95,68 +91,18 @@ class _WebPageState extends State<WebPage> {
     );
   }
 
-  void updateFilds(BuildContext context) {
-    final form = Column(
-      children: [
-        TextFormField(
-          decoration: const InputDecoration(labelText: "Total de Capitulos"),
-          keyboardType: TextInputType.number,
-          controller: _tcharContr,
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Por favor, insira o quantos capitulos tem';
-            }
-            if (double.tryParse(value) == null) {
-              return "Por favor, insira um numero valido";
-            }
-            return null;
-          },
-        ),
-        TextFormField(
-          decoration:
-              const InputDecoration(labelText: "Total de Capitulos Lidos"),
-          keyboardType: TextInputType.number,
-          controller: _rchatContr,
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Por favor, insira em qual capitulos esta';
-            }
-            if (double.tryParse(value) == null) {
-              return "Por favor, insira um numero valido";
-            }
-            return null;
-          },
-        ),
-      ],
-    );
+  void _showUpdateFieldsDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Form(
-          key: _formKey,
-          child: AlertDialog(
-            title: Text('Atializar'),
-            content: form,
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      final newManga = _mangaModel.copyWith(
-                        totalChapters: double.parse(_tcharContr.text),
-                        chaptersRead: double.parse(_rchatContr.text),
-                        lastRead: DateTime.now(),
-                      );
-                      _repository.updateManga(newManga).then((a) {
-                        setState(() {
-                          _mangaModel = newManga;
-                        });
-                        Navigator.of(context).pop();
-                      });
-                    }
-                  },
-                  child: Text('Salvar')),
-            ],
-          ),
+        return UpdateFieldsDialog(
+          mangaModel: _mangaModel,
+          repository: _repository,
+          onUpdate: (updatedManga) {
+            setState(() {
+              _mangaModel = updatedManga;
+            });
+          },
         );
       },
     );

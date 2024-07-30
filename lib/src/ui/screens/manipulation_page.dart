@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:my_mangas/src/data/manga_repository.dart';
 import 'package:my_mangas/src/models/manga_model.dart';
 import 'package:my_mangas/src/ui/components/piker_image.dart';
+import 'package:my_mangas/src/ui/screens/manga_page.dart';
 
 class ManipulationPage extends StatefulWidget {
   final MangaModel? manga;
@@ -153,15 +154,21 @@ class _ManipulationPageState extends State<ManipulationPage> {
   Future<void> _addManga(BuildContext context, MangaModel manga) async {
     try {
       int id = await _mangaRepository.insertManga(manga);
-      if (mounted) {
+      if (!mounted) return;
+      Navigator.pushReplacement(
         // ignore: use_build_context_synchronously
-        _showAlert(context, 'Success', 'Novo Manga inserido com id: $id');
-      }
+        context,
+        MaterialPageRoute(
+          builder: (context) => MangaPage(
+            mangaId: id,
+            nowDate: DateTime.now(),
+          ),
+        ),
+      );
     } catch (e) {
-      if (mounted) {
-        // ignore: use_build_context_synchronously
-        _showAlert(context, 'Error', 'Erro: $e');
-      }
+      if (!mounted) return;
+      // ignore: use_build_context_synchronously
+      _showAlert(context, 'Error', 'Erro: $e');
     }
   }
 

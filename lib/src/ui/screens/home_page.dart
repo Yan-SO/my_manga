@@ -13,7 +13,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late Future<List<MangaModel>> _mangasFuture;
-  final DateTime nowDate = DateTime.now();
+
   final MangaRepository _mangaRepository = MangaRepository();
   final TextEditingController _searchController = TextEditingController();
   List<MangaModel> _filteredMangas = [];
@@ -67,6 +67,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final DateTime nowDate = DateTime.now();
+
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
