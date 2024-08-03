@@ -1,4 +1,5 @@
 import 'package:my_mangas/src/data/database_helper.dart';
+import 'package:my_mangas/src/models/fonts_model.dart';
 import 'package:my_mangas/src/models/manga_model.dart';
 import 'package:my_mangas/src/models/tegs_model.dart';
 import 'package:sqflite/sqflite.dart';
@@ -55,6 +56,38 @@ class MangaRepository {
       where: 'id = ?',
       whereArgs: [id],
     );
+  }
+
+  //  Métodos para FontsModel
+
+  Future<int> insertFont(FontsModel font) async {
+    final db = await _databaseHelper.database;
+    return db.insert(
+      'fonts',
+      font.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<FontsModel>> getAllFonts() async {
+    final db = await _databaseHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query("fonts");
+    return List.generate(maps.length, (i) {
+      return FontsModel.fromJson(maps[i]);
+    });
+  }
+
+  Future<int> getFontsCount() async {
+    final db = await _databaseHelper.database;
+    final count = Sqflite.firstIntValue(
+      await db.rawQuery('SELECT COUNT(*) FROM fonts'),
+    );
+    return count ?? 0;
+  }
+
+  Future<void> deletefonts(int id) async {
+    final db = await _databaseHelper.database;
+    await db.delete('fonts', where: 'id = ?', whereArgs: [id]);
   }
 
   //  Métodos para TegsModel

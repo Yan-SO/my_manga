@@ -32,13 +32,21 @@ class _ManipulationPageState extends State<ManipulationPage> {
   }
 
   @override
+  void dispose() {
+    _titleController.dispose();
+    _tcharController.dispose();
+    _rchatController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     MangaModel? manga = widget.manga;
 
     return Scaffold(
       appBar: AppBar(
         title: _title(manga),
-        backgroundColor: Theme.of(context).colorScheme.tertiary,
+        backgroundColor: Theme.of(context).colorScheme.secondary,
       ),
       body: SingleChildScrollView(
         child: Column(

@@ -4,9 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class PikerImage extends StatefulWidget {
+  final double? height;
+  final double? width;
+  final double? fontSize;
   final Function(File) onImagePicked;
   final String? imageManga;
-  const PikerImage({super.key, required this.onImagePicked, this.imageManga});
+  const PikerImage({
+    super.key,
+    required this.onImagePicked,
+    this.imageManga,
+    this.height,
+    this.width,
+    this.fontSize,
+  });
 
   @override
   State<PikerImage> createState() => _PikerImageState();
@@ -43,14 +53,14 @@ class _PikerImageState extends State<PikerImage> {
         _pickImage(ImageSource.gallery);
       },
       child: SizedBox(
-        height: (widthScreen * (4 / 6)),
-        width: (widthScreen * (2 / 5)),
+        height: widget.height ?? (widthScreen * (4 / 6)),
+        width: widget.width ?? (widthScreen * (2 / 5)),
         child: Card(
-          color: Color.fromARGB(255, 36, 36, 36),
+          color: const Color.fromARGB(255, 36, 36, 36),
           child: _image == null
-              ? const Text(
+              ? Text(
                   "clique aqui para selecionar uma imagem",
-                  style: TextStyle(fontSize: 30),
+                  style: TextStyle(fontSize: widget.fontSize ?? 30),
                   textAlign: TextAlign.center,
                 )
               : ClipRect(

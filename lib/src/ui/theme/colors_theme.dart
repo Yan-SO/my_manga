@@ -6,9 +6,9 @@ class MyColorsTheme {
     const brightness = Brightness.dark; // Modo de brilho escuro
     const primary = Color(0xFF4CAF50); // Cor do texto sobre a cor primária
     const onPrimary = Color(0xFF333333); // Cor primária
-    const secondary = Color(0xFF6D6D6D); // Cor secundária
+    const secondary = Color(0xFF1E1E1E); // Cor secundária
     const onSecondary = Colors.white; // Cor do texto sobre a cor secundária
-    const tertiary = Color(0xFF1E1E1E);
+    const tertiary = Color(0xFF6D6D6D);
     const onTertiary = Color.fromARGB(255, 221, 221, 221);
     const error = Colors.red; // Cor de erro
     const onError = Colors.white; // Cor do texto sobre a cor de erro

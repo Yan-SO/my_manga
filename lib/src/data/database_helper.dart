@@ -18,8 +18,9 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'app_database.db');
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -32,15 +33,26 @@ class DatabaseHelper {
         urlManga TEXT,
         chaptersRead REAL,
         totalChapters REAL,
-        lastRead TEXT
+        lastRead TEXT,
+        fontsModelId INTEGER,
+        FOREIGN KEY (fontsModelId) REFERENCES fonts (id)
       )
     ''');
     await db.execute('''
-    CREATE TABLE tegs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      tegName TEXT,
-      children INTEGER
-    )
+      CREATE TABLE fonts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        fontName TEXT,
+        children INTEGER,
+        imgUrl TEXT,
+        urlFont TEXT
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE tegs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        tegName TEXT,
+        children INTEGER
+      )
     ''');
     await db.execute('''
       CREATE TABLE manga_tegs (
@@ -50,5 +62,22 @@ class DatabaseHelper {
         FOREIGN KEY (tegId) REFERENCES tegs (id)
       )
     ''');
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('''
+        CREATE TABLE fonts (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          fontName TEXT,
+          children INTEGER,
+          imgUrl TEXT,
+          urlFont TEXT
+        )
+      ''');
+      await db.execute('''
+        ALTER TABLE manga ADD COLUMN fontsModelId INTEGER;
+      ''');
+    }
   }
 }

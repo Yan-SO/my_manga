@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:my_mangas/src/models/manga_model.dart';
 import 'package:my_mangas/src/ui/screens/manga_page.dart';
 
-class ItemCard extends StatelessWidget {
+class ItemCardManga extends StatelessWidget {
   final MangaModel manga;
   final DateTime nowDate;
   final VoidCallback findMangas;
 
-  const ItemCard({
+  const ItemCardManga({
     super.key,
     required this.manga,
     required this.nowDate,
@@ -32,7 +32,7 @@ class ItemCard extends StatelessWidget {
         findMangas();
       },
       child: Card(
-        color: Theme.of(context).colorScheme.tertiary,
+        color: Theme.of(context).colorScheme.secondary,
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Row(children: [

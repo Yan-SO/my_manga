@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_mangas/src/data/manga_repository.dart';
 import 'package:my_mangas/src/models/manga_model.dart';
-import 'package:my_mangas/src/ui/components/drawer_menu_header.dart';
+import 'package:my_mangas/src/ui/components/web_drawer_menu_header.dart';
 import 'package:my_mangas/src/ui/components/update_fields_dialog.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -51,11 +51,11 @@ class _WebPageState extends State<WebPage> {
     return SizedBox(
       width: (width * (2 / 3)),
       child: Container(
-        color: Theme.of(context).colorScheme.tertiary,
+        color: Theme.of(context).colorScheme.secondary,
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            DrawerMenuHeader(
+            WebDrawerMenuHeader(
               controller: _controller,
               title: title,
             ),

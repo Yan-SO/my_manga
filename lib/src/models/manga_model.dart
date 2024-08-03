@@ -6,8 +6,10 @@ class MangaModel {
   final double chaptersRead;
   final double totalChapters;
   final DateTime lastRead;
+  final int? fontsModelId;
 
   MangaModel({
+    this.fontsModelId,
     this.urlManga,
     this.id,
     required this.title,
@@ -19,7 +21,7 @@ class MangaModel {
 
   @override
   String toString() {
-    return 'MangaModel{id: $id, title: $title, imgUrl: $imgUrl, urlManga: $urlManga, chaptersRead: $chaptersRead, totalChapters: $totalChapters, lastRead: $lastRead}';
+    return 'MangaModel{id: $id, title: $title, imgUrl: $imgUrl, urlManga: $urlManga, chaptersRead: $chaptersRead, totalChapters: $totalChapters, lastRead: $lastRead, fontsModelId: $fontsModelId}';
   }
 
   MangaModel copyWith({
@@ -30,6 +32,7 @@ class MangaModel {
     double? totalChapters,
     DateTime? lastRead,
     String? imgUrl,
+    int? fontsModelId,
   }) {
     return MangaModel(
       urlManga: urlManga ?? this.urlManga,
@@ -39,6 +42,7 @@ class MangaModel {
       totalChapters: totalChapters ?? this.totalChapters,
       lastRead: lastRead ?? this.lastRead,
       imgUrl: imgUrl ?? this.imgUrl,
+      fontsModelId: fontsModelId ?? this.fontsModelId,
     );
   }
 
@@ -51,6 +55,7 @@ class MangaModel {
       'chaptersRead': chaptersRead,
       'totalChapters': totalChapters,
       'lastRead': lastRead.toIso8601String(),
+      'fontsModelId': fontsModelId,
     };
   }
 
@@ -63,6 +68,7 @@ class MangaModel {
       chaptersRead: json['chaptersRead'],
       totalChapters: json['totalChapters'],
       lastRead: DateTime.parse(json['lastRead']),
+      fontsModelId: json['fontsModelId'],
     );
   }
 }

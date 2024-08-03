@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-class DrawerMenuHeader extends StatelessWidget {
-  const DrawerMenuHeader({
+class WebDrawerMenuHeader extends StatelessWidget {
+  const WebDrawerMenuHeader({
     super.key,
     required title,
     required WebViewController controller,

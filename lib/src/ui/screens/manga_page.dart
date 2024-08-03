@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:my_mangas/src/data/manga_repository.dart';
 import 'package:my_mangas/src/models/manga_model.dart';
 import 'package:my_mangas/src/ui/components/piker_image.dart';
+
 import 'package:my_mangas/src/ui/screens/web_page.dart';
 
 class MangaPage extends StatefulWidget {
@@ -77,7 +78,7 @@ class _MangaPageState extends State<MangaPage> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.tertiary,
+        backgroundColor: Theme.of(context).colorScheme.secondary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -110,7 +111,7 @@ class _MangaPageState extends State<MangaPage> {
             ),
             const Spacer(flex: 1),
             Card(
-              color: Theme.of(context).colorScheme.tertiary,
+              color: Theme.of(context).colorScheme.secondary,
               elevation: 16,
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -160,9 +161,7 @@ class _MangaPageState extends State<MangaPage> {
   }
 
   void _setImage(File image) {
-    _repository.updateManga(manga!.copyWith(imgUrl: image.path)).then((_) {
-      print(" o object foi atualisado");
-    });
+    _repository.updateManga(manga!.copyWith(imgUrl: image.path));
   }
 
   Widget _buildDataRow(String description, String value) {
