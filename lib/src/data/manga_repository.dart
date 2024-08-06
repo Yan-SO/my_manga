@@ -171,4 +171,20 @@ class MangaRepository {
       return MangaModel.fromJson(maps[i]);
     });
   }
+// metodos relaçoes entre mangas e fontes
+
+  Future<List<MangaModel>> getMangasbyIdfromFont(int id) async {
+    final db = await _databaseHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'manga',
+      where: 'fontsModelId = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isEmpty) {
+      return [];
+    }
+
+    return List<MangaModel>.from(maps.map((map) => MangaModel.fromJson(map)));
+  }
 }

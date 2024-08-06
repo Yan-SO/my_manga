@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
         colorScheme: MyColorsTheme.myColors(),
         useMaterial3: true,
       ),
-      home: SafeArea(child: HomePage()),
+      home: const SafeArea(child: HomePage()),
     );
   }
 }

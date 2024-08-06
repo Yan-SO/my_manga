@@ -19,11 +19,14 @@ class FontsWebPage extends StatefulWidget {
 class _FontsWebPageState extends State<FontsWebPage> {
   late final WebViewController _controller;
   final MangaRepository _repository = MangaRepository();
-  final List<MangaModel> _mangas = [];
+  late FontsModel _font;
+  bool _checkboxValue = true;
+  List<MangaModel> _allMangasList = [];
 
   @override
   void initState() {
     super.initState();
+    _font = widget.font;
     _loadMangas();
 
     _controller = WebViewController()
@@ -34,12 +37,35 @@ class _FontsWebPageState extends State<FontsWebPage> {
   }
 
   void _loadMangas() async {
-    final resp = await _repository.getAllMangas();
+    List<MangaModel> resp;
+    if (_checkboxValue) {
+      resp = await _repository.getMangasbyIdfromFont(widget.font.id!);
+    } else {
+      resp = await _repository.getAllMangas();
+    }
     setState(() {
-      _mangas.addAll(resp);
+      _allMangasList = resp;
     });
+  }
 
-    // fazer as relaçoes dos mangas com as fontes
+  void _saveUrl() {
+    _controller.currentUrl().then((value) {
+      if (value != null) {
+        setState(() {
+          _font = _font.copyWith(urlFont: value);
+          _repository.updateFont(_font);
+        });
+      } else {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text('Url é null: $value'),
+            );
+          },
+        );
+      }
+    });
   }
 
   Widget _webFontMenu(double width, BuildContext context) {
@@ -53,22 +79,26 @@ class _FontsWebPageState extends State<FontsWebPage> {
               title: widget.font.fontName,
               controller: _controller,
             ),
+            _checkboxMenu(),
             Expanded(
               child: ListView.builder(
-                itemCount: _mangas.length,
+                itemCount: _allMangasList.length,
                 itemBuilder: (context, index) {
                   return Card(
                     child: ListTile(
                       onTap: () {
-                        _showUpdateFieldsDialog(context, _mangas[index]);
+                        _showUpdateFieldsDialog(context, _allMangasList, index);
                       },
                       title: _tilte(index),
-                      subtitle:
-                          Text('total atual: ${_mangas[index].totalChapters}'),
-                      leading: _mangas[index].imgUrl != null
+                      subtitle: Text(
+                        'total atual: ${_allMangasList[index].totalChapters}',
+                      ),
+                      leading: _allMangasList[index].imgUrl != null
                           ? CircleAvatar(
-                              backgroundImage:
-                                  FileImage(File(_mangas[index].imgUrl!)))
+                              backgroundImage: FileImage(
+                                File(_allMangasList[index].imgUrl!),
+                              ),
+                            )
                           : const CircleAvatar(
                               backgroundColor: Colors.black,
                             ),
@@ -77,23 +107,34 @@ class _FontsWebPageState extends State<FontsWebPage> {
                 },
               ),
             ),
+            Card(
+              child: ListTile(
+                title: Center(child: Text('Salvar URL')),
+                subtitle: Text(
+                  'atual: ${_font.urlFont ?? "não tem"}',
+                  maxLines: 2,
+                ),
+                onTap: _saveUrl,
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  void _showUpdateFieldsDialog(BuildContext context, MangaModel mangaModel) {
+  void _showUpdateFieldsDialog(
+      BuildContext context, List<MangaModel> mangaModel, index) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return UpdateFieldsDialog(
           reads: false,
-          mangaModel: mangaModel,
+          mangaModel: mangaModel[index],
           repository: _repository,
           onUpdate: (updatedManga) {
             setState(() {
-              mangaModel = updatedManga;
+              mangaModel[index] = updatedManga;
             });
           },
         );
@@ -101,7 +142,24 @@ class _FontsWebPageState extends State<FontsWebPage> {
     );
   }
 
-  Text _tilte(int index) => Text(_mangas[index].title, maxLines: 2);
+  Widget _checkboxMenu() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text('Somente fontes atribuidas '),
+        Checkbox(
+            value: _checkboxValue,
+            onChanged: (value) {
+              setState(() {
+                _checkboxValue = value!;
+              });
+              _loadMangas();
+            })
+      ],
+    );
+  }
+
+  Text _tilte(int index) => Text(_allMangasList[index].title, maxLines: 2);
 
   @override
   Widget build(BuildContext context) {

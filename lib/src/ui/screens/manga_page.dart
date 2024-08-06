@@ -220,44 +220,41 @@ class _MangaPageState extends State<MangaPage> {
     return AlertDialog(
       content: fontsList.isEmpty
           ? const Text('Não existe fontes')
-          : Flexible(
-              fit: FlexFit.loose,
-              child: SizedBox(
-                width: (sizeScreen.width * (3 / 4)),
-                height: (sizeScreen.height * (2 / 3)),
-                child: ListView.builder(
-                  itemCount: fontsList.length,
-                  itemBuilder: (context, index) {
-                    return Card(
-                      child: ListTile(
-                        onTap: () async {
-                          await _repository.updateManga(manga!.copyWith(
-                            fontsModelId: fontsList[index].id!,
-                          ));
-                          var children = fontsList[index].children;
-                          await _repository.updateFont(
-                            fontsList[index].copyWith(children: children + 1),
-                          );
-                          setState(() {
-                            _fontsModel = fontsList[index];
-                          });
+          : SizedBox(
+              width: (sizeScreen.width * (3 / 4)),
+              height: (sizeScreen.height * (2 / 3)),
+              child: ListView.builder(
+                itemCount: fontsList.length,
+                itemBuilder: (context, index) {
+                  return Card(
+                    child: ListTile(
+                      onTap: () async {
+                        await _repository.updateManga(manga!.copyWith(
+                          fontsModelId: fontsList[index].id!,
+                        ));
+                        var children = fontsList[index].children;
+                        await _repository.updateFont(
+                          fontsList[index].copyWith(children: children + 1),
+                        );
+                        setState(() {
+                          _fontsModel = fontsList[index];
+                        });
 
-                          Navigator.pop(context);
-                        },
-                        title: Text(fontsList[index].fontName, maxLines: 2),
-                        leading: fontsList[index].imgUrl != null
-                            ? CircleAvatar(
-                                backgroundImage: FileImage(
-                                  File(fontsList[index].imgUrl!),
-                                ),
-                              )
-                            : const CircleAvatar(
-                                backgroundColor: Colors.black,
+                        Navigator.pop(context);
+                      },
+                      title: Text(fontsList[index].fontName, maxLines: 2),
+                      leading: fontsList[index].imgUrl != null
+                          ? CircleAvatar(
+                              backgroundImage: FileImage(
+                                File(fontsList[index].imgUrl!),
                               ),
-                      ),
-                    );
-                  },
-                ),
+                            )
+                          : const CircleAvatar(
+                              backgroundColor: Colors.black,
+                            ),
+                    ),
+                  );
+                },
               ),
             ),
     );

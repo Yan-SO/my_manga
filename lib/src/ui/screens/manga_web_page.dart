@@ -114,13 +114,15 @@ class _MangaWebPageState extends State<MangaWebPage> {
         setState(() {
           _mangaModel = _mangaModel.copyWith(urlManga: value);
           _repository.updateManga(_mangaModel);
-          AlertDialog(
-            title: Text('Url atualizado: $value'),
-          );
         });
       } else {
-        AlertDialog(
-          title: Text('Url é null: $value'),
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text('Url é null: $value'),
+            );
+          },
         );
       }
     });
