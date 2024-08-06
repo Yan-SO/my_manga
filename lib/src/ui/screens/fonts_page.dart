@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:my_mangas/src/data/manga_repository.dart';
 import 'package:my_mangas/src/models/fonts_model.dart';
 import 'package:my_mangas/src/ui/components/piker_image.dart';
+import 'package:my_mangas/src/ui/screens/fonts_web_page.dart';
 
 class FontsPage extends StatefulWidget {
   FontsPage({super.key});
@@ -30,6 +31,16 @@ class _FontsPageState extends State<FontsPage> {
   void initState() {
     super.initState();
     _loadFonts();
+  }
+
+  @override
+  void dispose() {
+    _nameFontController.dispose();
+    super.dispose();
+  }
+
+  void _setImage(File img) {
+    _image = img;
   }
 
   Future<void> _loadFonts() async {
@@ -85,6 +96,18 @@ class _FontsPageState extends State<FontsPage> {
             itemBuilder: (context, index) {
               return Card(
                 child: ListTile(
+                  //sub ttitulo com os filhos
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FontsWebPage(
+                          font: _list[index],
+                        ),
+                      ),
+                    );
+                  },
+                  subtitle: Text('mangas: ${_list[index].children}'),
                   trailing: IconButton(
                     icon: Icon(Icons.delete_outlined),
                     onPressed: () {
@@ -189,9 +212,5 @@ class _FontsPageState extends State<FontsPage> {
         ],
       ),
     );
-  }
-
-  void _setImage(File img) {
-    _image = img;
   }
 }

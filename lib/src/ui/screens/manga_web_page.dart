@@ -7,15 +7,15 @@ import 'package:my_mangas/src/ui/components/web_drawer_menu_header.dart';
 import 'package:my_mangas/src/ui/components/update_fields_dialog.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-class WebPage extends StatefulWidget {
+class MangaWebPage extends StatefulWidget {
   final MangaModel manga;
-  const WebPage({super.key, required this.manga});
+  const MangaWebPage({super.key, required this.manga});
 
   @override
-  _WebPageState createState() => _WebPageState();
+  _MangaWebPageState createState() => _MangaWebPageState();
 }
 
-class _WebPageState extends State<WebPage> {
+class _MangaWebPageState extends State<MangaWebPage> {
   late final WebViewController _controller;
   final MangaRepository _repository = MangaRepository();
 

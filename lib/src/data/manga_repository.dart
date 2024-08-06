@@ -77,12 +77,36 @@ class MangaRepository {
     });
   }
 
+  Future<FontsModel?> getFontById(int id) async {
+    final db = await _databaseHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'fonts',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (maps.isNotEmpty) {
+      return FontsModel.fromJson(maps.first);
+    } else {
+      return null;
+    }
+  }
+
   Future<int> getFontsCount() async {
     final db = await _databaseHelper.database;
     final count = Sqflite.firstIntValue(
       await db.rawQuery('SELECT COUNT(*) FROM fonts'),
     );
     return count ?? 0;
+  }
+
+  Future<void> updateFont(FontsModel font) async {
+    final db = await _databaseHelper.database;
+    db.update(
+      'fonts',
+      font.toJson(),
+      where: 'id = ?',
+      whereArgs: [font.id],
+    );
   }
 
   Future<void> deletefonts(int id) async {

@@ -24,6 +24,19 @@ class MangaModel {
     return 'MangaModel{id: $id, title: $title, imgUrl: $imgUrl, urlManga: $urlManga, chaptersRead: $chaptersRead, totalChapters: $totalChapters, lastRead: $lastRead, fontsModelId: $fontsModelId}';
   }
 
+  MangaModel updateFonts(int? fontsId) {
+    return MangaModel(
+      id: id,
+      imgUrl: imgUrl,
+      urlManga: urlManga,
+      fontsModelId: fontsId,
+      title: title,
+      chaptersRead: chaptersRead,
+      totalChapters: totalChapters,
+      lastRead: lastRead,
+    );
+  }
+
   MangaModel copyWith({
     String? urlManga,
     int? id,

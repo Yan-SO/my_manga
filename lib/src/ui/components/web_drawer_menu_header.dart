@@ -18,6 +18,7 @@ class WebDrawerMenuHeader extends StatelessWidget {
       child: Column(
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
               GestureDetector(
                 onTap: () async {

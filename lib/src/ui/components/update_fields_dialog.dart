@@ -5,6 +5,8 @@ import 'package:my_mangas/src/models/manga_model.dart';
 class UpdateFieldsDialog extends StatefulWidget {
   final MangaModel mangaModel;
   final MangaRepository repository;
+  final bool total;
+  final bool reads;
   final Function(MangaModel) onUpdate;
 
   const UpdateFieldsDialog({
@@ -12,6 +14,8 @@ class UpdateFieldsDialog extends StatefulWidget {
     required this.mangaModel,
     required this.repository,
     required this.onUpdate,
+    this.total = true,
+    this.reads = true,
   });
 
   @override
@@ -26,10 +30,19 @@ class _UpdateFieldsDialogState extends State<UpdateFieldsDialog> {
   @override
   void initState() {
     super.initState();
-    _tcharContr =
-        TextEditingController(text: widget.mangaModel.totalChapters.toString());
-    _rchatContr =
-        TextEditingController(text: widget.mangaModel.chaptersRead.toString());
+    _tcharContr = TextEditingController(
+      text: widget.mangaModel.totalChapters.toString(),
+    );
+    _rchatContr = TextEditingController(
+      text: widget.mangaModel.chaptersRead.toString(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _tcharContr.dispose();
+    _rchatContr.dispose();
+    super.dispose();
   }
 
   @override
@@ -41,71 +54,81 @@ class _UpdateFieldsDialogState extends State<UpdateFieldsDialog> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextFormField(
-              decoration:
-                  const InputDecoration(labelText: "Total de Capitulos"),
-              keyboardType: TextInputType.number,
-              controller: _tcharContr,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Por favor, insira o quantos capitulos tem';
-                }
-                if (double.tryParse(value) == null) {
-                  return "Por favor, insira um numero valido";
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            GestureDetector(
-              onTap: () {
-                var totalNum = double.tryParse(_tcharContr.text);
-                if (totalNum != null) {
-                  totalNum++;
-                  _tcharContr.text = totalNum.toString();
-                }
-              },
-              child: const Card(
-                color: Color.fromARGB(255, 24, 24, 24),
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(32, 16, 32, 16),
-                  child: Text('Aumetar Totais'),
-                ),
+            if (widget.total)
+              Column(
+                children: [
+                  TextFormField(
+                    decoration:
+                        const InputDecoration(labelText: "Total de Capitulos"),
+                    keyboardType: TextInputType.number,
+                    controller: _tcharContr,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Por favor, insira o quantos capitulos tem';
+                      }
+                      if (double.tryParse(value) == null) {
+                        return "Por favor, insira um numero valido";
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  GestureDetector(
+                    onTap: () {
+                      var totalNum = double.tryParse(_tcharContr.text);
+                      if (totalNum != null) {
+                        totalNum++;
+                        _tcharContr.text = totalNum.toString();
+                      }
+                    },
+                    child: const Card(
+                      color: Color.fromARGB(255, 24, 24, 24),
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(32, 16, 32, 16),
+                        child: Text('Aumetar Totais'),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 32),
-            TextFormField(
-              decoration:
-                  const InputDecoration(labelText: "Total de Capitulos Lidos"),
-              keyboardType: TextInputType.number,
-              controller: _rchatContr,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Por favor, insira em qual capitulos esta';
-                }
-                if (double.tryParse(value) == null) {
-                  return "Por favor, insira um numero valido";
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            GestureDetector(
-              onTap: () {
-                var readNum = double.tryParse(_rchatContr.text);
-                if (readNum != null) {
-                  readNum++;
-                  _rchatContr.text = readNum.toString();
-                }
-              },
-              child: const Card(
-                color: Color.fromARGB(255, 24, 24, 24),
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(32, 16, 32, 16),
-                  child: Text('Aumetar Lidos'),
-                ),
+            if (widget.reads)
+              Column(
+                children: [
+                  const SizedBox(height: 32),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                        labelText: "Total de Capitulos Lidos"),
+                    keyboardType: TextInputType.number,
+                    controller: _rchatContr,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Por favor, insira em qual capitulos esta';
+                      }
+                      if (double.tryParse(value) == null) {
+                        return "Por favor, insira um numero valido";
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  GestureDetector(
+                    onTap: () {
+                      var readNum = double.tryParse(_rchatContr.text);
+                      if (readNum != null) {
+                        readNum++;
+                        _rchatContr.text = readNum.toString();
+                      }
+                    },
+                    child: const Card(
+                      color: Color.fromARGB(255, 24, 24, 24),
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(32, 16, 32, 16),
+                        child: Text('Aumetar Lidos'),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
             const SizedBox(height: 32),
           ],
         ),
@@ -129,12 +152,5 @@ class _UpdateFieldsDialogState extends State<UpdateFieldsDialog> {
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _tcharContr.dispose();
-    _rchatContr.dispose();
-    super.dispose();
   }
 }
