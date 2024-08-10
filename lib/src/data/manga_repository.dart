@@ -39,6 +39,18 @@ class MangaRepository {
     }
   }
 
+  Future<List<MangaModel>> getMangasByTitle(String title) async {
+    final db = await _databaseHelper.database;
+    final resp = await db.query(
+      'manga',
+      where: 'title = ?',
+      whereArgs: [title],
+    );
+    return List.generate(resp.length, (i) {
+      return MangaModel.fromJson(resp[i]);
+    });
+  }
+
   Future<void> updateManga(MangaModel manga) async {
     final db = await _databaseHelper.database;
     db.update(

@@ -17,107 +17,195 @@ class ManipulationPage extends StatefulWidget {
 }
 
 class _ManipulationPageState extends State<ManipulationPage> {
-  final _styleTitle = const TextStyle(fontSize: 24);
-  final MangaRepository _mangaRepository = MangaRepository();
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _titleController;
-  late TextEditingController _tcharController;
-  late TextEditingController _rchatController;
+  final MangaRepository _mangaRepository = MangaRepository();
+  late final TextEditingController _titleController;
+  late final TextEditingController _totalChaptersController;
+  late final TextEditingController _chaptersReadController;
   File? _image;
 
   @override
   void initState() {
     super.initState();
-    _checkNew(widget.manga);
+    _initializeControllers(widget.manga);
   }
 
   @override
   void dispose() {
     _titleController.dispose();
-    _tcharController.dispose();
-    _rchatController.dispose();
+    _totalChaptersController.dispose();
+    _chaptersReadController.dispose();
     super.dispose();
+  }
+
+  void _initializeControllers(MangaModel? manga) {
+    if (manga != null) {
+      _titleController = TextEditingController(text: manga.title);
+      _totalChaptersController =
+          TextEditingController(text: manga.totalChapters.toString());
+      _chaptersReadController =
+          TextEditingController(text: manga.chaptersRead.toString());
+    } else {
+      _titleController = TextEditingController();
+      _totalChaptersController = TextEditingController();
+      _chaptersReadController = TextEditingController();
+    }
+  }
+
+  Future<int?> _saveManga(
+      BuildContext context, MangaModel manga, bool isNew) async {
+    try {
+      int id;
+      if (isNew) {
+        final list = await _mangaRepository.getMangasByTitle(manga.title);
+
+        if (list.isEmpty) {
+          id = await _mangaRepository.insertManga(manga);
+          return id;
+        } else {
+          if (!mounted) return null;
+          bool? shouldCreate = await _showAlert(
+            context,
+            title: 'O item já existe',
+            message: 'O item ${manga.title} já existe. Deseja criar mais um?',
+          );
+
+          if (shouldCreate == true) {
+            id = await _mangaRepository.insertManga(manga);
+            return id;
+          }
+          return null;
+        }
+      } else {
+        await _mangaRepository.updateManga(manga);
+        return manga.id!;
+      }
+    } catch (e) {
+      if (!mounted) return null;
+      await _showAlert(
+        context,
+        title: 'Erro',
+        message: 'Erro: $e',
+      );
+      return null;
+    }
+  }
+
+  Future<bool?> _showAlert(
+    BuildContext context, {
+    required String title,
+    required String message,
+  }) async {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text('Não'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text('Sim'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _setImage(File image) async {
+    _image = image;
   }
 
   @override
   Widget build(BuildContext context) {
-    MangaModel? manga = widget.manga;
+    final MangaModel? manga = widget.manga;
 
     return Scaffold(
       appBar: AppBar(
-        title: _title(manga),
+        title: Text(
+          manga != null ? "Atualizar o Manga" : "Novo Manga",
+          style: const TextStyle(fontSize: 24),
+        ),
         backgroundColor: Theme.of(context).colorScheme.secondary,
       ),
       body: SingleChildScrollView(
+        padding: const EdgeInsets.all(8),
         child: Column(
           children: [
             const SizedBox(height: 12),
             PikerImage(
+              imageManga: manga?.imgUrl,
               onImagePicked: _setImage,
             ),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: _titleController,
-                      decoration: const InputDecoration(labelText: "Titulo"),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor, insira o título';
-                        }
-                        return null;
-                      },
-                    ),
-                    TextFormField(
-                      decoration: const InputDecoration(
-                          labelText: "Total de Capitulos"),
-                      keyboardType: TextInputType.number,
-                      controller: _tcharController,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor, insira o quantos capitulos tem';
-                        }
-                        if (double.tryParse(value) == null) {
-                          return "Por favor, insira um numero valido";
-                        }
-                        return null;
-                      },
-                    ),
-                    TextFormField(
-                      decoration: const InputDecoration(
-                          labelText: "Total de Capitulos Lidos"),
-                      keyboardType: TextInputType.number,
-                      controller: _rchatController,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor, insira em qual capitulos esta';
-                        }
-                        if (double.tryParse(value) == null) {
-                          return "Por favor, insira um numero valido";
-                        }
-                        return null;
-                      },
-                    ),
-                  ],
-                ),
+            const SizedBox(height: 20),
+            Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  _buildTextFormField(
+                    controller: _titleController,
+                    label: "Título",
+                    validator: (value) => value == null || value.isEmpty
+                        ? 'Por favor, insira o título'
+                        : null,
+                  ),
+                  _buildTextFormField(
+                    controller: _totalChaptersController,
+                    label: "Total de Capítulos",
+                    keyboardType: TextInputType.number,
+                    validator: _validateNumber,
+                  ),
+                  _buildTextFormField(
+                    controller: _chaptersReadController,
+                    label: "Capítulos Lidos",
+                    keyboardType: TextInputType.number,
+                    validator: _validateNumber,
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (_formKey.currentState!.validate()) {
-                  if (manga == null) {
-                    final newManga = MangaModel(
-                      title: _titleController.text,
-                      chaptersRead: double.parse(_rchatController.text),
-                      totalChapters: double.parse(_tcharController.text),
-                      lastRead: DateTime.now(),
-                      imgUrl: _image?.path,
+                  final newManga = MangaModel(
+                    title: _titleController.text,
+                    chaptersRead: double.parse(_chaptersReadController.text),
+                    totalChapters: double.parse(_totalChaptersController.text),
+                    lastRead: DateTime.now(),
+                    imgUrl: _image?.path,
+                  );
+                  final id = await _saveManga(
+                      context,
+                      manga?.copyWith(
+                            title: _titleController.text,
+                            chaptersRead:
+                                double.parse(_chaptersReadController.text),
+                            totalChapters:
+                                double.parse(_totalChaptersController.text),
+                            imgUrl: _image?.path,
+                          ) ??
+                          newManga,
+                      manga == null);
+                  if (id != null) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MangaPage(
+                          nowDate: DateTime.now(),
+                          mangaId: id,
+                        ),
+                      ),
                     );
-                    _addManga(context, newManga);
                   }
                 }
               },
@@ -138,79 +226,27 @@ class _ManipulationPageState extends State<ManipulationPage> {
     );
   }
 
-  void _setImage(File image) {
-    _image = image;
-  }
-
-  Widget _title(MangaModel? manga) {
-    Widget title;
-    if (manga != null) {
-      title = Text(
-        "Atualizar o manga",
-        style: _styleTitle,
-      );
-    } else {
-      title = Text(
-        "Novo Manga",
-        style: _styleTitle,
-      );
-    }
-
-    return title;
-  }
-
-  Future<void> _addManga(BuildContext context, MangaModel manga) async {
-    try {
-      int id = await _mangaRepository.insertManga(manga);
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        // ignore: use_build_context_synchronously
-        context,
-        MaterialPageRoute(
-          builder: (context) => MangaPage(
-            mangaId: id,
-            nowDate: DateTime.now(),
-          ),
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      // ignore: use_build_context_synchronously
-      _showAlert(context, 'Error', 'Erro: $e');
-    }
-  }
-
-  void _showAlert(BuildContext context, String title, String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(message),
-          actions: [
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
+  Widget _buildTextFormField({
+    required TextEditingController controller,
+    required String label,
+    String? Function(String?)? validator,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(labelText: label),
+      keyboardType: keyboardType,
+      validator: validator,
     );
   }
 
-  void _checkNew(MangaModel? manga) {
-    if (manga != null) {
-      _titleController = TextEditingController(text: manga.title);
-      _tcharController =
-          TextEditingController(text: manga.totalChapters.toString());
-      _rchatController =
-          TextEditingController(text: manga.chaptersRead.toString());
-    } else {
-      _titleController = TextEditingController();
-      _tcharController = TextEditingController();
-      _rchatController = TextEditingController();
+  String? _validateNumber(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Por favor, insira um valor';
     }
+    if (double.tryParse(value) == null) {
+      return "Por favor, insira um número válido";
+    }
+    return null;
   }
 }

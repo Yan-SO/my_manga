@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -8,16 +6,21 @@ import 'package:my_mangas/src/models/fonts_model.dart';
 import 'package:my_mangas/src/models/manga_model.dart';
 import 'package:my_mangas/src/ui/components/piker_image.dart';
 import 'package:my_mangas/src/ui/screens/fonts_web_page.dart';
-
 import 'package:my_mangas/src/ui/screens/manga_web_page.dart';
+import 'package:my_mangas/src/ui/screens/manipulation_page.dart';
 
 class MangaPage extends StatefulWidget {
   final DateTime nowDate;
   final int mangaId;
-  const MangaPage({super.key, required this.mangaId, required this.nowDate});
+
+  const MangaPage({
+    Key? key,
+    required this.mangaId,
+    required this.nowDate,
+  }) : super(key: key);
 
   @override
-  State<MangaPage> createState() => _MangaPageState();
+  _MangaPageState createState() => _MangaPageState();
 }
 
 class _MangaPageState extends State<MangaPage> {
@@ -31,16 +34,6 @@ class _MangaPageState extends State<MangaPage> {
     _loadMangaAndFont();
   }
 
-  Future<void> _loadFonts() async {
-    FontsModel? resp;
-    if (manga?.fontsModelId != null) {
-      resp = await _repository.getFontById(manga!.fontsModelId!);
-    }
-    setState(() {
-      _fontsModel = resp;
-    });
-  }
-
   Future<void> _loadMangaAndFont() async {
     try {
       final fetchedManga = await _repository.getMangaForId(widget.mangaId);
@@ -51,28 +44,58 @@ class _MangaPageState extends State<MangaPage> {
         await _loadFonts();
       }
     } catch (e) {
-      AlertDialog(
-        content: Text('Erro ao carregar o manga: $e'),
-      );
+      _showErrorDialog('Erro ao carregar o manga: $e');
     }
   }
 
-  void updateMangaForId(int mangaId) async {
-    var newManga = await _repository.getMangaForId(mangaId);
+  Future<void> _loadFonts() async {
+    if (manga?.fontsModelId != null) {
+      final fetchedFont = await _repository.getFontById(manga!.fontsModelId!);
+      setState(() {
+        _fontsModel = fetchedFont;
+      });
+    }
+  }
+
+  void _removeFont() async {
+    if (_fontsModel?.id != null) {
+      await _repository.updateManga(manga!.copyWith(fontsModelId: null));
+      await _repository.updateFont(
+        _fontsModel!.copyWith(children: _fontsModel!.children - 1),
+      );
+      setState(() {
+        _fontsModel = null;
+      });
+    } else {
+      _showErrorDialog('${_fontsModel!.fontName} não possui um ID válido.');
+    }
+  }
+
+  void _updateManga(int mangaId) async {
+    final updatedManga = await _repository.getMangaForId(mangaId);
     setState(() {
-      if (newManga != null) {
-        manga = newManga;
-      } else {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return const AlertDialog(
-              title: Text('Erro em achar o manga'),
-            );
-          },
-        );
-      }
+      manga = updatedManga;
     });
+  }
+
+  void _setImage(File image) {
+    _repository.updateManga(manga!.copyWith(imgUrl: image.path));
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Erro'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -80,193 +103,69 @@ class _MangaPageState extends State<MangaPage> {
     if (manga == null) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('manga Null'),
+          title: const Text('Manga Null'),
         ),
         body: const Center(
-          child: Text('manga Null'),
+          child: Text('Manga não encontrado'),
         ),
       );
     }
 
     final widthScreen = MediaQuery.of(context).size.width;
-    final days = widget.nowDate.difference(manga!.lastRead).inDays;
-    final toRead = manga!.totalChapters - manga!.chaptersRead;
+    final daysSinceLastRead = widget.nowDate.difference(manga!.lastRead).inDays;
+    final chaptersToRead = manga!.totalChapters - manga!.chaptersRead;
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.secondary,
-      ),
+      appBar: _buildAppBar(context),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            _mangaHeader(widthScreen),
-            const Spacer(flex: 1),
-            _mangaInfo(context, toRead, days),
+            _buildMangaHeader(widthScreen),
+            const Spacer(),
+            _buildMangaInfo(chaptersToRead, daysSinceLastRead),
             const Spacer(flex: 4),
-            _readButton(context),
-            Text("URL atual :${manga!.urlManga}", maxLines: 2),
+            _buildReadButton(),
+            _buildUrlText(),
           ],
         ),
       ),
     );
   }
 
-  ElevatedButton _readButton(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-      ),
-      onPressed: () async {
-        await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MangaWebPage(
-              manga: manga!,
-            ),
-          ),
-        );
-        updateMangaForId(manga!.id!);
-      },
-      child: Text(
-        "Ler Manga",
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.onPrimary,
-          fontSize: 24,
-        ),
-      ),
-    );
-  }
-
-  Card _mangaInfo(BuildContext context, double toRead, int days) {
-    return Card(
-      color: Theme.of(context).colorScheme.secondary,
-      elevation: 16,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildDataRow("Lidos", manga!.chaptersRead.toString()),
-            _buildDataRow("Total", manga!.totalChapters.toString()),
-            _buildDataRow("Falta ler", '$toRead'),
-            _buildDataRow("Tempo sem ler: ", '$days dias'),
-            const SizedBox(height: 8),
-            _fontIten(context),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _fontIten(BuildContext context) {
-    final sizeScreen = MediaQuery.of(context).size;
-
-    if (_fontsModel == null) {
-      return ListTile(
-        title: const Text('Atribuida uma fonte para o manga'),
-        onTap: () async {
-          final fontsList = await _repository.getAllFonts();
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return _showDialogContent(fontsList, sizeScreen);
-            },
-          );
-        },
-      );
-    }
-
-    return ListTile(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => FontsWebPage(
-              font: _fontsModel!,
-            ),
-          ),
-        );
-      },
-      trailing: IconButton(
-        icon: const Icon(Icons.delete_outlined),
-        onPressed: () async {
-          if (_fontsModel!.id != null) {
-            await _repository.updateManga(manga!.updateFonts(null));
-            var children = _fontsModel!.children;
-            await _repository.updateFont(
-              _fontsModel!.copyWith(children: children - 1),
-            );
-            setState(() {
-              _fontsModel = null;
-            });
-          } else {
-            AlertDialog(
-              title: Text('o ${_fontsModel!.fontName} não tem um id'),
-            );
-          }
-        },
-      ),
-      leading: _fontsModel!.imgUrl != null
-          ? CircleAvatar(backgroundImage: FileImage(File(_fontsModel!.imgUrl!)))
-          : const CircleAvatar(
-              backgroundColor: Colors.black,
-            ),
-      title: Text(_fontsModel!.fontName),
-    );
-  }
-
-  AlertDialog _showDialogContent(List<FontsModel> fontsList, Size sizeScreen) {
-    return AlertDialog(
-      content: fontsList.isEmpty
-          ? const Text('Não existe fontes')
-          : SizedBox(
-              width: (sizeScreen.width * (3 / 4)),
-              height: (sizeScreen.height * (2 / 3)),
-              child: ListView.builder(
-                itemCount: fontsList.length,
-                itemBuilder: (context, index) {
-                  return Card(
-                    child: ListTile(
-                      onTap: () async {
-                        await _repository.updateManga(manga!.copyWith(
-                          fontsModelId: fontsList[index].id!,
-                        ));
-                        var children = fontsList[index].children;
-                        await _repository.updateFont(
-                          fontsList[index].copyWith(children: children + 1),
-                        );
-                        setState(() {
-                          _fontsModel = fontsList[index];
-                        });
-
-                        Navigator.pop(context);
-                      },
-                      title: Text(fontsList[index].fontName, maxLines: 2),
-                      leading: fontsList[index].imgUrl != null
-                          ? CircleAvatar(
-                              backgroundImage: FileImage(
-                                File(fontsList[index].imgUrl!),
-                              ),
-                            )
-                          : const CircleAvatar(
-                              backgroundColor: Colors.black,
-                            ),
-                    ),
+  AppBar _buildAppBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: Theme.of(context).colorScheme.secondary,
+      title: Row(
+        children: [
+          const Spacer(),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (BuildContext context) {
+                  return ManipulationPage(
+                    dateNow: DateTime.now(),
+                    manga: manga,
                   );
-                },
-              ),
-            ),
+                }),
+              ).then((_) {
+                _updateManga(manga!.id!);
+              });
+            },
+          ),
+        ],
+      ),
     );
   }
 
-  Row _mangaHeader(double widthScreen) {
+  Widget _buildMangaHeader(double widthScreen) {
     return Row(
       children: [
-        // Imagem
         SizedBox(
-          height: (widthScreen * (4 / 6)),
-          width: (widthScreen * (2 / 5)),
+          height: widthScreen * 2 / 3,
+          width: widthScreen * 2 / 5,
           child: PikerImage(
             onImagePicked: _setImage,
             imageManga: manga?.imgUrl,
@@ -288,8 +187,137 @@ class _MangaPageState extends State<MangaPage> {
     );
   }
 
-  void _setImage(File image) {
-    _repository.updateManga(manga!.copyWith(imgUrl: image.path));
+  Widget _buildMangaInfo(double chaptersToRead, int daysSinceLastRead) {
+    return Card(
+      color: Theme.of(context).colorScheme.secondary,
+      elevation: 16,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildDataRow('Lidos', manga!.chaptersRead.toString()),
+            _buildDataRow('Total', manga!.totalChapters.toString()),
+            _buildDataRow('Falta ler', '$chaptersToRead'),
+            _buildDataRow('Tempo sem ler', '$daysSinceLastRead dias'),
+            const SizedBox(height: 8),
+            _buildFontItem(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFontItem() {
+    if (_fontsModel == null) {
+      return ListTile(
+        title: const Text('Atribuir uma fonte ao manga'),
+        onTap: _showFontSelectionDialog,
+      );
+    }
+
+    return ListTile(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => FontsWebPage(font: _fontsModel!),
+          ),
+        );
+      },
+      trailing: IconButton(
+        icon: const Icon(Icons.delete_outlined),
+        onPressed: _removeFont,
+      ),
+      leading: _buildFontAvatar(),
+      title: Text(_fontsModel!.fontName),
+    );
+  }
+
+  Widget _buildFontAvatar() {
+    return _fontsModel!.imgUrl != null
+        ? CircleAvatar(backgroundImage: FileImage(File(_fontsModel!.imgUrl!)))
+        : const CircleAvatar(backgroundColor: Colors.black);
+  }
+
+  Future<void> _showFontSelectionDialog() async {
+    final fontsList = await _repository.getAllFonts();
+    showDialog(
+      context: context,
+      builder: (context) => _buildFontSelectionContent(fontsList),
+    );
+  }
+
+  AlertDialog _buildFontSelectionContent(List<FontsModel> fontsList) {
+    final sizeScreen = MediaQuery.of(context).size;
+
+    return AlertDialog(
+      content: fontsList.isEmpty
+          ? const Text('Não existem fontes disponíveis')
+          : SizedBox(
+              width: sizeScreen.width * 3 / 4,
+              height: sizeScreen.height * 2 / 3,
+              child: ListView.builder(
+                itemCount: fontsList.length,
+                itemBuilder: (context, index) {
+                  final font = fontsList[index];
+                  return Card(
+                    child: ListTile(
+                      onTap: () async {
+                        await _repository.updateManga(
+                          manga!.copyWith(fontsModelId: font.id!),
+                        );
+                        await _repository.updateFont(
+                          font.copyWith(children: font.children + 1),
+                        );
+                        setState(() {
+                          _fontsModel = font;
+                        });
+                        Navigator.pop(context);
+                      },
+                      title: Text(font.fontName, maxLines: 2),
+                      leading: font.imgUrl != null
+                          ? CircleAvatar(
+                              backgroundImage: FileImage(File(font.imgUrl!)),
+                            )
+                          : const CircleAvatar(backgroundColor: Colors.black),
+                    ),
+                  );
+                },
+              ),
+            ),
+    );
+  }
+
+  ElevatedButton _buildReadButton() {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+      ),
+      onPressed: () async {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MangaWebPage(manga: manga!),
+          ),
+        );
+        _updateManga(manga!.id!);
+      },
+      child: Text(
+        'Ler Manga',
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onPrimary,
+          fontSize: 24,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUrlText() {
+    return Text(
+      'URL atual: ${manga!.urlManga}',
+      maxLines: 2,
+    );
   }
 
   Widget _buildDataRow(String description, String value) {
@@ -299,14 +327,8 @@ class _MangaPageState extends State<MangaPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            description,
-            style: style,
-          ),
-          Text(
-            value,
-            style: style,
-          ),
+          Text(description, style: style),
+          Text(value, style: style),
         ],
       ),
     );

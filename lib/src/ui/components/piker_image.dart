@@ -34,6 +34,18 @@ class _PikerImageState extends State<PikerImage> {
     }
   }
 
+  @override
+  void didUpdateWidget(PikerImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.imageManga != oldWidget.imageManga) {
+      if (widget.imageManga != null) {
+        setState(() {
+          _image = File(widget.imageManga!);
+        });
+      }
+    }
+  }
+
   Future<void> _pickImage(ImageSource source) async {
     final XFile? image = await _picker.pickImage(source: source);
     if (image != null) {
