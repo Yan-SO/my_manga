@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:my_mangas/src/data/manga_repository.dart';
 import 'package:my_mangas/src/models/manga_model.dart';
 import 'package:my_mangas/src/ui/components/piker_image.dart';
+import 'package:my_mangas/src/ui/components/show_custom_alert.dart';
 import 'package:my_mangas/src/ui/screens/manga_page.dart';
 
 class ManipulationPage extends StatefulWidget {
@@ -64,7 +65,7 @@ class _ManipulationPageState extends State<ManipulationPage> {
           return id;
         } else {
           if (!mounted) return null;
-          bool? shouldCreate = await _showAlert(
+          bool? shouldCreate = await showCustomAlert(
             context,
             title: 'O item já existe',
             message: 'O item ${manga.title} já existe. Deseja criar mais um?',
@@ -82,43 +83,13 @@ class _ManipulationPageState extends State<ManipulationPage> {
       }
     } catch (e) {
       if (!mounted) return null;
-      await _showAlert(
+      await showCustomAlert(
         context,
         title: 'Erro',
         message: 'Erro: $e',
       );
       return null;
     }
-  }
-
-  Future<bool?> _showAlert(
-    BuildContext context, {
-    required String title,
-    required String message,
-  }) async {
-    return showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              child: const Text('Não'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-              child: const Text('Sim'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   void _setImage(File image) async {

@@ -40,14 +40,7 @@ class ItemCardManga extends StatelessWidget {
               // Imagem
               height: 72,
               width: 72,
-              child: manga.imgUrl == null
-                  ? const Placeholder()
-                  : ClipRect(
-                      child: FittedBox(
-                        fit: BoxFit.cover,
-                        child: Image.file(File(manga.imgUrl!)),
-                      ),
-                    ),
+              child: _buildImage(manga.imgUrl),
             ), // Imagem
             const SizedBox(
               width: 8,
@@ -86,6 +79,30 @@ class ItemCardManga extends StatelessWidget {
           ]),
         ),
       ),
+    );
+  }
+
+  Widget _buildImage(String? imageUrl) {
+    if (imageUrl == null) return const Placeholder();
+
+    final file = File(imageUrl);
+
+    return FutureBuilder<bool>(
+      future: file.exists(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Placeholder();
+        } else if (snapshot.hasData && snapshot.data == true) {
+          return ClipRect(
+            child: FittedBox(
+              fit: BoxFit.cover,
+              child: Image.file(file),
+            ),
+          );
+        } else {
+          return const Placeholder();
+        }
+      },
     );
   }
 }

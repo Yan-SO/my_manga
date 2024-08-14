@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:my_mangas/src/ui/screens/config_page.dart';
 import 'package:my_mangas/src/ui/screens/fonts_page.dart';
 import 'package:my_mangas/src/ui/screens/manga_list_page.dart';
 
@@ -23,6 +24,7 @@ class _HomePageState extends State<HomePage> {
   static final List<Widget> _pages = <Widget>[
     MangaListPage(),
     FontsPage(),
+    ConfigPage(),
   ];
 
   @override
@@ -41,6 +43,10 @@ class _HomePageState extends State<HomePage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.account_tree_outlined),
             label: 'Fontes',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Configurações',
           ),
         ],
       ),

@@ -29,8 +29,15 @@ class _PikerImageState extends State<PikerImage> {
   @override
   void initState() {
     super.initState();
+    _setImage();
+  }
+
+  void _setImage() async {
     if (widget.imageManga != null) {
-      _image = File(widget.imageManga!);
+      final file = File(widget.imageManga!);
+      if (await file.exists()) {
+        _image = file;
+      }
     }
   }
 
