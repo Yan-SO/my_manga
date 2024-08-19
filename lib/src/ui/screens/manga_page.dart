@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:my_mangas/src/data/manga_repository.dart';
 import 'package:my_mangas/src/models/fonts_model.dart';
 import 'package:my_mangas/src/models/manga_model.dart';
@@ -173,13 +174,21 @@ class _MangaPageState extends State<MangaPage> {
         ),
         const SizedBox(width: 16),
         Expanded(
-          child: Text(
-            manga!.title,
-            maxLines: 7,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          child: GestureDetector(
+            onLongPress: () async {
+              await Clipboard.setData(ClipboardData(text: manga!.title));
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text('Texto copiado!'),
+              ));
+            },
+            child: Text(
+              manga!.title,
+              maxLines: 7,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
