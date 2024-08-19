@@ -1,7 +1,7 @@
 import 'package:my_mangas/src/data/database_helper.dart';
-import 'package:my_mangas/src/models/fonts_model.dart';
-import 'package:my_mangas/src/models/manga_model.dart';
-import 'package:my_mangas/src/models/tegs_model.dart';
+import 'package:my_mangas/src/data/models/fonts_model.dart';
+import 'package:my_mangas/src/data/models/manga_model.dart';
+import 'package:my_mangas/src/data/models/tegs_model.dart';
 import 'package:sqflite/sqflite.dart';
 
 class MangaRepository {

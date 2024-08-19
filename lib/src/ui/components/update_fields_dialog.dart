@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_mangas/src/data/manga_repository.dart';
-import 'package:my_mangas/src/models/manga_model.dart';
+import 'package:my_mangas/src/data/models/manga_model.dart';
 
 class UpdateFieldsDialog extends StatefulWidget {
   final MangaModel mangaModel;

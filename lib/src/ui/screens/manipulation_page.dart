@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:my_mangas/src/data/manga_repository.dart';
-import 'package:my_mangas/src/models/manga_model.dart';
+import 'package:my_mangas/src/data/models/manga_model.dart';
 import 'package:my_mangas/src/ui/components/piker_image.dart';
 import 'package:my_mangas/src/ui/components/show_custom_alert.dart';
 import 'package:my_mangas/src/ui/screens/manga_page.dart';

@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:my_mangas/src/data/manga_repository.dart';
-import 'package:my_mangas/src/models/manga_model.dart';
+import 'package:my_mangas/src/data/models/manga_model.dart';
 import 'package:my_mangas/src/ui/components/home_menu.dart';
 import 'package:my_mangas/src/ui/components/item_card.dart';
 import 'package:my_mangas/src/ui/screens/manipulation_page.dart';
