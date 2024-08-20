@@ -19,14 +19,13 @@ class FontsPage extends StatefulWidget {
 class _FontsPageState extends State<FontsPage> {
   late Future<List<FontsModel>> _fontesFuture;
   final MangaRepository _repository = MangaRepository();
-
   final _formKey = GlobalKey<FormState>();
-
   final TextEditingController _nameFontController = TextEditingController();
-
   List<FontsModel> _list = [];
-
   File? _image;
+  bool _edit = false;
+  FontsModel? _font;
+  String? _stringImageManga;
 
   @override
   void initState() {
@@ -42,6 +41,12 @@ class _FontsPageState extends State<FontsPage> {
 
   void _setImage(File img) {
     _image = img;
+  }
+
+  void _setStringImageManga(String img) {
+    setState(() {
+      _stringImageManga = img;
+    });
   }
 
   Future<void> _loadFonts() async {
@@ -107,6 +112,17 @@ class _FontsPageState extends State<FontsPage> {
 
   ListTile _buildListItem(BuildContext context, int index) {
     return ListTile(
+      onLongPress: () {
+        _font = _list[index];
+        _nameFontController.text = _font!.fontName;
+        if (_font!.imgUrl != null) _setStringImageManga(_font!.imgUrl!);
+        setState(() {
+          _edit = true;
+        });
+        if (_font!.imgUrl != null) {
+          _setImage(File(_font!.imgUrl!));
+        }
+      },
       onTap: () {
         Navigator.push(
           context,
@@ -164,6 +180,7 @@ class _FontsPageState extends State<FontsPage> {
         children: [
           SizedBox(width: 8),
           PikerImage(
+            imageManga: _stringImageManga,
             onImagePicked: _setImage,
             height: 150,
             width: 150,
@@ -193,17 +210,31 @@ class _FontsPageState extends State<FontsPage> {
                   ),
                   TextButton(
                     onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _repository.insertFont(FontsModel(
-                          imgUrl: _image?.path,
-                          fontName: _nameFontController.text,
-                          children: 0,
-                        ));
-                        _loadFonts();
+                      if (_edit) {
+                        if (_formKey.currentState!.validate()) {
+                          _repository.updateFont(_font!.copyWith(
+                            imgUrl: _image?.path,
+                            fontName: _nameFontController.text,
+                          ));
+                          _loadFonts();
+                          setState(() {
+                            _edit = false;
+                          });
+                        }
+                      } else {
+                        if (_formKey.currentState!.validate()) {
+                          _repository.insertFont(FontsModel(
+                            imgUrl: _image?.path,
+                            fontName: _nameFontController.text,
+                            children: 0,
+                          ));
+                          _loadFonts();
+                        }
+                        _nameFontController.text = '';
                       }
                     },
                     child: Text(
-                      'Adicionar',
+                      _edit ? 'Editar' : 'Adicionar',
                       style: TextStyle(fontSize: 16),
                     ),
                   )
