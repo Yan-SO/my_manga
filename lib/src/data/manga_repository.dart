@@ -183,6 +183,7 @@ class MangaRepository {
       return MangaModel.fromJson(maps[i]);
     });
   }
+
 // metodos relaçoes entre mangas e fontes
 
   Future<List<MangaModel>> getMangasbyIdfromFont(int id) async {
@@ -198,5 +199,25 @@ class MangaRepository {
     }
 
     return List<MangaModel>.from(maps.map((map) => MangaModel.fromJson(map)));
+  }
+
+  Future<void> linkFontInManga(MangaModel manga, FontsModel font) async {
+    final updateMangaFuture = updateManga(
+      manga.copyWith(fontsModelId: font.id),
+    );
+    final updateFontFuture = updateFont(font.copyWith(
+      children: (font.children + 1),
+    ));
+
+    await Future.wait([updateMangaFuture, updateFontFuture]);
+  }
+
+  Future<void> unlinkFontInManga(MangaModel manga, FontsModel font) async {
+    final updateMangaFuture = updateManga(manga.updateFonts(null));
+    final updateFontFuture = updateFont(font.copyWith(
+      children: (font.children - 1),
+    ));
+
+    await Future.wait([updateMangaFuture, updateFontFuture]);
   }
 }

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:my_mangas/src/data/manga_repository.dart';
 import 'package:my_mangas/src/data/models/fonts_model.dart';
 import 'package:my_mangas/src/data/models/manga_model.dart';
+import 'package:my_mangas/src/ui/components/confirm_delete_alert.dart';
 import 'package:my_mangas/src/ui/components/piker_image.dart';
 import 'package:my_mangas/src/ui/screens/fonts_web_page.dart';
 import 'package:my_mangas/src/ui/screens/manga_web_page.dart';
@@ -15,10 +16,10 @@ class MangaPage extends StatefulWidget {
   final int mangaId;
 
   const MangaPage({
-    Key? key,
+    super.key,
     required this.mangaId,
     required this.nowDate,
-  }) : super(key: key);
+  });
 
   @override
   _MangaPageState createState() => _MangaPageState();
@@ -50,26 +51,24 @@ class _MangaPageState extends State<MangaPage> {
   }
 
   Future<void> _loadFonts() async {
+    FontsModel? fetchedFont;
     if (manga?.fontsModelId != null) {
-      final fetchedFont = await _repository.getFontById(manga!.fontsModelId!);
-      setState(() {
-        _fontsModel = fetchedFont;
-      });
+      fetchedFont = await _repository.getFontById(manga!.fontsModelId!);
     }
+    setState(() {
+      _fontsModel = fetchedFont;
+    });
   }
 
   void _removeFont() async {
-    if (_fontsModel?.id != null) {
-      await _repository.updateManga(manga!.copyWith(fontsModelId: null));
-      await _repository.updateFont(
-        _fontsModel!.copyWith(children: _fontsModel!.children - 1),
-      );
-      setState(() {
-        _fontsModel = null;
-      });
-    } else {
-      _showErrorDialog('${_fontsModel!.fontName} não possui um ID válido.');
-    }
+    await confirmDeleteAlert(
+      context,
+      font: _fontsModel,
+      manga: manga,
+      title: 'Remover',
+      message: 'Deseja desatribuir essa fonte desse manga?',
+    );
+    _loadMangaAndFont();
   }
 
   void _updateManga(int mangaId) async {
@@ -273,12 +272,7 @@ class _MangaPageState extends State<MangaPage> {
                   return Card(
                     child: ListTile(
                       onTap: () async {
-                        await _repository.updateManga(
-                          manga!.copyWith(fontsModelId: font.id!),
-                        );
-                        await _repository.updateFont(
-                          font.copyWith(children: font.children + 1),
-                        );
+                        await _repository.linkFontInManga(manga!, font);
                         setState(() {
                           _fontsModel = font;
                         });

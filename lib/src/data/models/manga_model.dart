@@ -37,6 +37,19 @@ class MangaModel {
     );
   }
 
+  MangaModel updateUrlManga(String? newUrlManga) {
+    return MangaModel(
+      id: id,
+      imgUrl: imgUrl,
+      urlManga: newUrlManga,
+      fontsModelId: fontsModelId,
+      title: title,
+      chaptersRead: chaptersRead,
+      totalChapters: totalChapters,
+      lastRead: lastRead,
+    );
+  }
+
   MangaModel copyWith({
     String? urlManga,
     int? id,

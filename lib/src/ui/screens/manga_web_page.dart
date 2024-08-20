@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_mangas/src/data/manga_repository.dart';
 import 'package:my_mangas/src/data/models/manga_model.dart';
+import 'package:my_mangas/src/ui/components/confirm_delete_alert.dart';
 import 'package:my_mangas/src/ui/components/web_drawer_menu_header.dart';
 import 'package:my_mangas/src/ui/components/update_fields_dialog.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -82,7 +83,19 @@ class _MangaWebPageState extends State<MangaWebPage> {
                   'atual: ${_mangaModel.urlManga ?? "não tem"}',
                   maxLines: 2,
                 ),
-                onTap: saveUrl,
+                onTap: _saveUrl,
+                onLongPress: () async {
+                  confirmDeleteAlert(
+                    context,
+                    saveMangaState: (newManga) {
+                      setState(() {
+                        _mangaModel = newManga;
+                      });
+                    },
+                    mangaUrl: _mangaModel,
+                    message: 'Deseja apagar a URL salva?',
+                  );
+                },
               ),
             ),
           ],
@@ -108,7 +121,7 @@ class _MangaWebPageState extends State<MangaWebPage> {
     );
   }
 
-  void saveUrl() {
+  void _saveUrl() {
     _controller.currentUrl().then((value) {
       if (value != null) {
         setState(() {

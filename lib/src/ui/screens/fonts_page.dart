@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:my_mangas/src/data/manga_repository.dart';
 import 'package:my_mangas/src/data/models/fonts_model.dart';
+import 'package:my_mangas/src/ui/components/confirm_delete_alert.dart';
 import 'package:my_mangas/src/ui/components/piker_image.dart';
 import 'package:my_mangas/src/ui/screens/fonts_web_page.dart';
 
@@ -70,11 +71,11 @@ class _FontsPageState extends State<FontsPage> {
             return Column(
               children: [
                 SizedBox(height: 8),
-                _addFonts(context),
+                _buildAddFonts(context),
                 SizedBox(height: 30),
-                _fontsTitle(),
+                _buildFontsTitle(),
                 SizedBox(height: 15),
-                _listFonts(),
+                _buildListFonts(),
               ],
             );
           }
@@ -83,7 +84,7 @@ class _FontsPageState extends State<FontsPage> {
     );
   }
 
-  Widget _listFonts() {
+  Widget _buildListFonts() {
     if (_list.isEmpty) return Text('Sem fontes adiciondas');
 
     return Expanded(
@@ -95,43 +96,7 @@ class _FontsPageState extends State<FontsPage> {
             itemCount: _list.length,
             itemBuilder: (context, index) {
               return Card(
-                child: ListTile(
-                  //sub ttitulo com os filhos
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => FontsWebPage(
-                          font: _list[index],
-                        ),
-                      ),
-                    );
-                  },
-                  subtitle: Text('mangas: ${_list[index].children}'),
-                  trailing: IconButton(
-                    icon: Icon(Icons.delete_outlined),
-                    onPressed: () {
-                      if (_list[index].id != null) {
-                        _repository.deletefonts(_list[index].id!).then((_) {
-                          _loadFonts();
-                        });
-                      } else {
-                        AlertDialog(
-                          title:
-                              Text('o ${_list[index].fontName} não tem um id'),
-                        );
-                      }
-                    },
-                  ),
-                  leading: _list[index].imgUrl != null
-                      ? CircleAvatar(
-                          backgroundImage:
-                              FileImage(File(_list[index].imgUrl!)))
-                      : CircleAvatar(
-                          backgroundColor: Colors.black,
-                        ),
-                  title: Text(_list[index].fontName),
-                ),
+                child: _buildListItem(context, index),
               );
             },
           ),
@@ -140,7 +105,46 @@ class _FontsPageState extends State<FontsPage> {
     );
   }
 
-  Text _fontsTitle() {
+  ListTile _buildListItem(BuildContext context, int index) {
+    return ListTile(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => FontsWebPage(
+              font: _list[index],
+            ),
+          ),
+        );
+      },
+      subtitle: Text('mangas: ${_list[index].children}'),
+      trailing: IconButton(
+        icon: Icon(Icons.delete_outlined),
+        onPressed: () async {
+          if (_list[index].id != null) {
+            await confirmDeleteAlert(
+              context,
+              message: 'Deseja deletar essa fonte?',
+              font: _list[index],
+            );
+            _loadFonts();
+          } else {
+            AlertDialog(
+              title: Text('o ${_list[index].fontName} não tem um id'),
+            );
+          }
+        },
+      ),
+      leading: _list[index].imgUrl != null
+          ? CircleAvatar(backgroundImage: FileImage(File(_list[index].imgUrl!)))
+          : CircleAvatar(
+              backgroundColor: Colors.black,
+            ),
+      title: Text(_list[index].fontName),
+    );
+  }
+
+  Text _buildFontsTitle() {
     return Text(
       ".   . . . . . . Fontes . . . . . .   .",
       style: TextStyle(
@@ -152,7 +156,7 @@ class _FontsPageState extends State<FontsPage> {
     );
   }
 
-  Widget _addFonts(BuildContext context) {
+  Widget _buildAddFonts(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
       color: Color.fromARGB(186, 0, 0, 0),
@@ -190,7 +194,6 @@ class _FontsPageState extends State<FontsPage> {
                   TextButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        // testar ↓↓↓
                         _repository.insertFont(FontsModel(
                           imgUrl: _image?.path,
                           fontName: _nameFontController.text,
