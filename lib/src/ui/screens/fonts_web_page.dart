@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:my_mangas/src/data/manga_repository.dart';
 import 'package:my_mangas/src/data/models/fonts_model.dart';
 import 'package:my_mangas/src/data/models/manga_model.dart';
+import 'package:my_mangas/src/ui/components/save_url_button.dart';
 import 'package:my_mangas/src/ui/components/update_fields_dialog.dart';
 import 'package:my_mangas/src/ui/components/web_drawer_menu_header.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -63,26 +64,6 @@ class _FontsWebPageState extends State<FontsWebPage> {
     });
   }
 
-  void _saveUrl() {
-    _controller.currentUrl().then((value) {
-      if (value != null) {
-        setState(() {
-          _font = _font.copyWith(urlFont: value);
-          _repository.updateFont(_font);
-        });
-      } else {
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Text('Url é null: $value'),
-            );
-          },
-        );
-      }
-    });
-  }
-
   void _filterList(String text) {
     setState(() {
       if (text.isNotEmpty) {
@@ -135,16 +116,16 @@ class _FontsWebPageState extends State<FontsWebPage> {
                 },
               ),
             ),
-            Card(
-              child: ListTile(
-                title: const Center(child: Text('Salvar URL')),
-                subtitle: Text(
-                  'atual: ${_font.urlFont ?? "não tem"}',
-                  maxLines: 2,
-                ),
-                onTap: _saveUrl,
-              ),
-            ),
+            SaveUrlButton(
+              controller: _controller,
+              fontsModel: _font,
+              reloadState: () async {
+                final font = await _repository.getFontById(_font.id!);
+                setState(() {
+                  if (font != null) _font = font;
+                });
+              },
+            )
           ],
         ),
       ),

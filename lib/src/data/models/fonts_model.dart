@@ -12,6 +12,7 @@ class FontsModel {
     required this.children,
     this.urlFont,
   });
+
   FontsModel copyWith({
     int? id,
     String? fontName,
@@ -25,6 +26,16 @@ class FontsModel {
       children: children ?? this.children,
       imgUrl: imgUrl ?? this.imgUrl,
       urlFont: urlFont ?? this.urlFont,
+    );
+  }
+
+  FontsModel updateUrlFont(String? newUrlfonte) {
+    return FontsModel(
+      id: id,
+      imgUrl: imgUrl,
+      urlFont: newUrlfonte,
+      fontName: fontName,
+      children: children,
     );
   }
 
