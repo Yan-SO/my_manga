@@ -36,7 +36,9 @@ class _PikerImageState extends State<PikerImage> {
     if (widget.imageManga != null) {
       final file = File(widget.imageManga!);
       if (await file.exists()) {
-        _image = file;
+        setState(() {
+          _image = file;
+        });
       }
     }
   }
