@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_mangas/src/data/manga_repository.dart';
 import 'package:my_mangas/src/data/models/manga_model.dart';
-import 'package:my_mangas/src/ui/components/confirm_delete_alert.dart';
 import 'package:my_mangas/src/ui/components/save_url_button.dart';
 import 'package:my_mangas/src/ui/components/web_drawer_menu_header.dart';
 import 'package:my_mangas/src/ui/components/update_fields_dialog.dart';

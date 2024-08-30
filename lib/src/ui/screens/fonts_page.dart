@@ -123,8 +123,8 @@ class _FontsPageState extends State<FontsPage> {
           _setImage(File(_font!.imgUrl!));
         }
       },
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => FontsWebPage(
@@ -132,6 +132,7 @@ class _FontsPageState extends State<FontsPage> {
             ),
           ),
         );
+        _loadFonts();
       },
       subtitle: Text('mangas: ${_list[index].children}'),
       trailing: IconButton(
