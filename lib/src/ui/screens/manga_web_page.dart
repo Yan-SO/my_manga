@@ -21,6 +21,7 @@ class _MangaWebPageState extends State<MangaWebPage> {
   final MangaRepository _repository = MangaRepository();
 
   late MangaModel _mangaModel;
+  int _progress = 0;
 
   @override
   void initState() {
@@ -28,6 +29,15 @@ class _MangaWebPageState extends State<MangaWebPage> {
     _mangaModel = widget.manga;
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            setState(() {
+              _progress = progress;
+            });
+          },
+        ),
+      )
       ..loadRequest(
         Uri.parse(_mangaModel.urlManga ?? "https://www.google.com.br/"),
       );
@@ -40,6 +50,16 @@ class _MangaWebPageState extends State<MangaWebPage> {
       endDrawer: _webViewMenu(title, _controller),
       appBar: AppBar(
         title: Text(title),
+        bottom: _progress < 100
+            ? PreferredSize(
+                preferredSize: const Size.fromHeight(2.0),
+                child: LinearProgressIndicator(
+                  value: _progress / 100,
+                  color: Colors.blue,
+                  backgroundColor: Colors.grey[200],
+                ),
+              )
+            : null,
       ),
       body: WebViewWidget(
         controller: _controller,

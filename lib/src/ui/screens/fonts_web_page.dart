@@ -24,6 +24,7 @@ class _FontsWebPageState extends State<FontsWebPage> {
   bool _checkboxValue = true;
   List<MangaModel> _allMangasList = [];
   List<MangaModel> _filteredList = [];
+  int _progress = 0;
 
   @override
   void initState() {
@@ -33,6 +34,15 @@ class _FontsWebPageState extends State<FontsWebPage> {
 
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            setState(() {
+              _progress = progress;
+            });
+          },
+        ),
+      )
       ..loadRequest(
         Uri.parse(widget.font.urlFont ?? "https://www.google.com.br/"),
       );
@@ -192,7 +202,19 @@ class _FontsWebPageState extends State<FontsWebPage> {
     final width = MediaQuery.of(context).size.width;
     return Scaffold(
       endDrawer: _buildWebFontMenu(width, context),
-      appBar: AppBar(title: Text(widget.font.fontName)),
+      appBar: AppBar(
+        title: Text(widget.font.fontName),
+        bottom: _progress < 100
+            ? PreferredSize(
+                preferredSize: const Size.fromHeight(2.0),
+                child: LinearProgressIndicator(
+                  value: _progress / 100,
+                  color: Colors.blue,
+                  backgroundColor: Colors.grey[200],
+                ),
+              )
+            : null,
+      ),
       body: WebViewWidget(controller: _controller),
     );
   }
