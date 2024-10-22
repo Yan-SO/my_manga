@@ -7,6 +7,7 @@ import 'package:my_mangas/src/data/manga_repository.dart';
 import 'package:my_mangas/src/data/models/fonts_model.dart';
 import 'package:my_mangas/src/ui/components/confirm_delete_alert.dart';
 import 'package:my_mangas/src/ui/components/piker_image.dart';
+import 'package:my_mangas/src/ui/components/show_custom_alert.dart';
 import 'package:my_mangas/src/ui/screens/fonts_web_page.dart';
 
 class FontsPage extends StatefulWidget {
@@ -20,6 +21,7 @@ class _FontsPageState extends State<FontsPage> {
   late Future<List<FontsModel>> _fontesFuture;
   final MangaRepository _repository = MangaRepository();
   final _formKey = GlobalKey<FormState>();
+  final ConfirmDeleteAlert _confirmDeleteAlert = ConfirmDeleteAlert();
   final TextEditingController _nameFontController = TextEditingController();
   List<FontsModel> _list = [];
   File? _image;
@@ -113,7 +115,6 @@ class _FontsPageState extends State<FontsPage> {
   ListTile _buildListItem(BuildContext context, int index) {
     return ListTile(
       onLongPress: () {
-        // adicionar deletar
         _font = _list[index];
         _nameFontController.text = _font!.fontName;
         if (_font!.imgUrl != null) _setStringImageManga(_font!.imgUrl!);
@@ -139,11 +140,7 @@ class _FontsPageState extends State<FontsPage> {
         icon: Icon(Icons.delete_outlined),
         onPressed: () async {
           if (_list[index].id != null) {
-            await confirmDeleteAlert(
-              context,
-              message: 'Deseja deletar essa fonte?',
-              font: _list[index],
-            );
+            await _confirmDeleteAlert.deletefont(_list[index], context);
             _loadFonts();
           } else {
             AlertDialog(
@@ -209,35 +206,58 @@ class _FontsPageState extends State<FontsPage> {
                   SizedBox(
                     height: 8,
                   ),
-                  TextButton(
-                    onPressed: () {
-                      if (_edit) {
-                        if (_formKey.currentState!.validate()) {
-                          _repository.updateFont(_font!.copyWith(
-                            imgUrl: _image?.path,
-                            fontName: _nameFontController.text,
-                          ));
-                          _loadFonts();
-                          setState(() {
-                            _edit = false;
-                          });
-                        }
-                      } else {
-                        if (_formKey.currentState!.validate()) {
-                          _repository.insertFont(FontsModel(
-                            imgUrl: _image?.path,
-                            fontName: _nameFontController.text,
-                            children: 0,
-                          ));
-                          _loadFonts();
-                        }
-                        _nameFontController.text = '';
-                      }
-                    },
-                    child: Text(
-                      _edit ? 'Editar' : 'Adicionar',
-                      style: TextStyle(fontSize: 16),
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _edit
+                          ? TextButton(
+                              onPressed: () async {
+                                await _confirmDeleteAlert.deletefont(
+                                    _font!, context);
+                                _loadFonts();
+                                setState(() {
+                                  _edit = false;
+                                });
+                              },
+                              child: Text(
+                                "Deletar",
+                                style: TextStyle(
+                                  color: const Color.fromARGB(255, 255, 72, 0),
+                                ),
+                              ),
+                            )
+                          : SizedBox.shrink(),
+                      TextButton(
+                        onPressed: () {
+                          if (_edit) {
+                            if (_formKey.currentState!.validate()) {
+                              _repository.updateFont(_font!.copyWith(
+                                imgUrl: _image?.path,
+                                fontName: _nameFontController.text,
+                              ));
+                              _loadFonts();
+                              setState(() {
+                                _edit = false;
+                              });
+                            }
+                          } else {
+                            if (_formKey.currentState!.validate()) {
+                              _repository.insertFont(FontsModel(
+                                imgUrl: _image?.path,
+                                fontName: _nameFontController.text,
+                                children: 0,
+                              ));
+                              _loadFonts();
+                            }
+                            _nameFontController.text = '';
+                          }
+                        },
+                        child: Text(
+                          _edit ? 'Editar' : 'Adicionar',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    ],
                   )
                 ],
               ),

@@ -220,4 +220,14 @@ class MangaRepository {
 
     await Future.wait([updateMangaFuture, updateFontFuture]);
   }
+
+  Future<void> safeDeletefonts(FontsModel font) async {
+    final mangaList = await getMangasbyIdfromFont(font.id!);
+
+    await Future.forEach(mangaList, (manga) async {
+      await unlinkFontInManga(manga, font);
+    });
+
+    await deletefonts(font.id!);
+  }
 }

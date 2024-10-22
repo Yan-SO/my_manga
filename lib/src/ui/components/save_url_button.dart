@@ -7,10 +7,11 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class SaveUrlButton extends StatelessWidget {
   final WebViewController controller;
+  final ConfirmDeleteAlert _confirmDeleteAlert = ConfirmDeleteAlert();
   final MangaModel? mangaModel;
   final FontsModel? fontsModel;
   final VoidCallback reloadState;
-  const SaveUrlButton({
+  SaveUrlButton({
     super.key,
     required this.controller,
     required this.reloadState,
@@ -32,17 +33,15 @@ class SaveUrlButton extends StatelessWidget {
         },
         onLongPress: () async {
           if (mangaModel != null) {
-            await confirmDeleteAlert(
+            await _confirmDeleteAlert.cleanURLMangaOrFont(
               context,
-              mangaUrl: mangaModel,
-              message: 'Deseja apagar a URL salva?',
+              manga: mangaModel,
             );
           }
           if (fontsModel != null) {
-            await confirmDeleteAlert(
+            await _confirmDeleteAlert.cleanURLMangaOrFont(
               context,
-              fontUrl: fontsModel,
-              message: 'Deseja apagar a URL salva?',
+              font: fontsModel,
             );
           }
           reloadState();

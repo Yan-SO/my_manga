@@ -27,6 +27,7 @@ class MangaPage extends StatefulWidget {
 
 class _MangaPageState extends State<MangaPage> {
   final MangaRepository _repository = MangaRepository();
+  final ConfirmDeleteAlert _confirmDeleteAlert = ConfirmDeleteAlert();
   FontsModel? _fontsModel;
   MangaModel? manga;
 
@@ -61,14 +62,14 @@ class _MangaPageState extends State<MangaPage> {
   }
 
   void _removeFont() async {
-    await confirmDeleteAlert(
-      context,
-      font: _fontsModel,
-      manga: manga,
-      title: 'Remover',
-      message: 'Deseja desatribuir essa fonte desse manga?',
-    );
-    _loadMangaAndFont();
+    if (_fontsModel != null && manga != null) {
+      await _confirmDeleteAlert.unlinkFontInManga(
+        context,
+        font: _fontsModel!,
+        manga: manga!,
+      );
+      _loadMangaAndFont();
+    }
   }
 
   void _updateManga(int mangaId) async {
