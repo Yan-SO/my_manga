@@ -113,6 +113,7 @@ class _FontsPageState extends State<FontsPage> {
   ListTile _buildListItem(BuildContext context, int index) {
     return ListTile(
       onLongPress: () {
+        // adicionar deletar
         _font = _list[index];
         _nameFontController.text = _font!.fontName;
         if (_font!.imgUrl != null) _setStringImageManga(_font!.imgUrl!);
@@ -134,7 +135,6 @@ class _FontsPageState extends State<FontsPage> {
         );
         _loadFonts();
       },
-      subtitle: Text('mangas: ${_list[index].children}'),
       trailing: IconButton(
         icon: Icon(Icons.delete_outlined),
         onPressed: () async {

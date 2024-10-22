@@ -6,9 +6,12 @@ class WebDrawerMenuHeader extends StatelessWidget {
     super.key,
     required title,
     required WebViewController controller,
+    subtitle,
   })  : _controller = controller,
+        _subtitle = subtitle,
         _title = title;
 
+  final String? _subtitle;
   final WebViewController _controller;
   final String _title;
 
@@ -47,6 +50,11 @@ class WebDrawerMenuHeader extends StatelessWidget {
             ],
           ),
           Text(_title),
+          const Spacer(),
+          Text(
+            _subtitle ?? "",
+            style: const TextStyle(fontSize: 14),
+          ),
         ],
       ),
     );

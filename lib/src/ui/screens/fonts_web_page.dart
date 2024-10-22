@@ -95,6 +95,7 @@ class _FontsWebPageState extends State<FontsWebPage> {
           children: [
             WebDrawerMenuHeader(
               title: widget.font.fontName,
+              subtitle: 'Tem ${_allMangasList.length} fontes atribudas',
               controller: _controller,
             ),
             _buildCheckboxMenu(),
@@ -167,13 +168,14 @@ class _FontsWebPageState extends State<FontsWebPage> {
       children: [
         const Text('Somente fontes atribuidas '),
         Checkbox(
-            value: _checkboxValue,
-            onChanged: (value) {
-              setState(() {
-                _checkboxValue = value!;
-              });
-              _loadMangas();
-            })
+          value: _checkboxValue,
+          onChanged: (value) {
+            setState(() {
+              _checkboxValue = value!;
+            });
+            _loadMangas();
+          },
+        )
       ],
     );
   }
