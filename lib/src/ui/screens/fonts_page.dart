@@ -7,7 +7,6 @@ import 'package:my_mangas/src/data/manga_repository.dart';
 import 'package:my_mangas/src/data/models/fonts_model.dart';
 import 'package:my_mangas/src/ui/components/confirm_delete_alert.dart';
 import 'package:my_mangas/src/ui/components/piker_image.dart';
-import 'package:my_mangas/src/ui/components/show_custom_alert.dart';
 import 'package:my_mangas/src/ui/screens/fonts_web_page.dart';
 
 class FontsPage extends StatefulWidget {

@@ -6,6 +6,7 @@ import 'package:my_mangas/src/data/models/manga_model.dart';
 import 'package:my_mangas/src/ui/components/save_url_button.dart';
 import 'package:my_mangas/src/ui/components/update_fields_dialog.dart';
 import 'package:my_mangas/src/ui/components/web_drawer_menu_header.dart';
+import 'package:my_mangas/src/ui/components/web_top_bar.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class FontsWebPage extends StatefulWidget {
@@ -24,7 +25,6 @@ class _FontsWebPageState extends State<FontsWebPage> {
   bool _checkboxValue = true;
   List<MangaModel> _allMangasList = [];
   List<MangaModel> _filteredList = [];
-  int _progress = 0;
 
   @override
   void initState() {
@@ -34,15 +34,6 @@ class _FontsWebPageState extends State<FontsWebPage> {
 
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onProgress: (int progress) {
-            setState(() {
-              _progress = progress;
-            });
-          },
-        ),
-      )
       ..loadRequest(
         Uri.parse(widget.font.urlFont ?? "https://www.google.com.br/"),
       );
@@ -204,19 +195,7 @@ class _FontsWebPageState extends State<FontsWebPage> {
     final width = MediaQuery.of(context).size.width;
     return Scaffold(
       endDrawer: _buildWebFontMenu(width, context),
-      appBar: AppBar(
-        title: Text(widget.font.fontName),
-        bottom: _progress < 100
-            ? PreferredSize(
-                preferredSize: const Size.fromHeight(2.0),
-                child: LinearProgressIndicator(
-                  value: _progress / 100,
-                  color: Colors.blue,
-                  backgroundColor: Colors.grey[200],
-                ),
-              )
-            : null,
-      ),
+      appBar: WebTopBar(controller: _controller, title: widget.font.fontName),
       body: WebViewWidget(controller: _controller),
     );
   }

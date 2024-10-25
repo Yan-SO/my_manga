@@ -6,6 +6,7 @@ import 'package:my_mangas/src/data/models/manga_model.dart';
 import 'package:my_mangas/src/ui/components/save_url_button.dart';
 import 'package:my_mangas/src/ui/components/web_drawer_menu_header.dart';
 import 'package:my_mangas/src/ui/components/update_fields_dialog.dart';
+import 'package:my_mangas/src/ui/components/web_top_bar.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class MangaWebPage extends StatefulWidget {
@@ -21,7 +22,6 @@ class _MangaWebPageState extends State<MangaWebPage> {
   final MangaRepository _repository = MangaRepository();
 
   late MangaModel _mangaModel;
-  int _progress = 0;
 
   @override
   void initState() {
@@ -29,15 +29,6 @@ class _MangaWebPageState extends State<MangaWebPage> {
     _mangaModel = widget.manga;
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onProgress: (int progress) {
-            setState(() {
-              _progress = progress;
-            });
-          },
-        ),
-      )
       ..loadRequest(
         Uri.parse(_mangaModel.urlManga ?? "https://www.google.com.br/"),
       );
@@ -48,19 +39,7 @@ class _MangaWebPageState extends State<MangaWebPage> {
     final title = _mangaModel.title;
     return Scaffold(
       endDrawer: _webViewMenu(title, _controller),
-      appBar: AppBar(
-        title: Text(title),
-        bottom: _progress < 100
-            ? PreferredSize(
-                preferredSize: const Size.fromHeight(2.0),
-                child: LinearProgressIndicator(
-                  value: _progress / 100,
-                  color: Colors.blue,
-                  backgroundColor: Colors.grey[200],
-                ),
-              )
-            : null,
-      ),
+      appBar: WebTopBar(controller: _controller, title: title),
       body: WebViewWidget(
         controller: _controller,
       ),
