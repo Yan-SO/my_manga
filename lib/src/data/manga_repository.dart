@@ -7,6 +7,8 @@ import 'package:sqflite/sqflite.dart';
 class MangaRepository {
   final DatabaseHelper _databaseHelper = DatabaseHelper();
 
+  // Métodos para manga
+
   Future<int> insertManga(MangaModel manga) async {
     final db = await _databaseHelper.database;
     return await db.insert(

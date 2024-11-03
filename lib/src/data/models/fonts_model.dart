@@ -63,4 +63,12 @@ class FontsModel {
       urlFont: json['urlFont'],
     );
   }
+
+  bool isUrlNull() {
+    if (urlFont == null) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }

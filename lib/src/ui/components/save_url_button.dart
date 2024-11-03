@@ -3,12 +3,14 @@ import 'package:my_mangas/src/data/manga_repository.dart';
 import 'package:my_mangas/src/data/models/fonts_model.dart';
 import 'package:my_mangas/src/data/models/manga_model.dart';
 import 'package:my_mangas/src/ui/components/confirm_delete_alert.dart';
+import 'package:my_mangas/src/ui/components/show_custom_alert.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class SaveUrlButton extends StatelessWidget {
   final WebViewController controller;
   final ConfirmDeleteAlert _confirmDeleteAlert = ConfirmDeleteAlert();
   final MangaModel? mangaModel;
+  final repository = MangaRepository();
   final FontsModel? fontsModel;
   final VoidCallback reloadState;
   SaveUrlButton({
@@ -28,8 +30,20 @@ class SaveUrlButton extends StatelessWidget {
           'atual: ${fontsModel?.urlFont ?? mangaModel?.urlManga ?? "não tem"}',
           maxLines: 2,
         ),
-        onTap: () {
-          _saveUrl(context);
+        onTap: () async {
+          if ((mangaModel?.isUrlNull() ?? false) ||
+              (fontsModel?.isUrlNull() ?? false)) {
+            _saveUrl(context);
+          } else {
+            bool? replace = await showCustomAlert(
+              context,
+              title: 'Atualizar',
+              message: 'Deseja atualizar o Url?',
+            );
+            if (replace ?? false) {
+              _saveUrl(context);
+            }
+          }
         },
         onLongPress: () async {
           if (mangaModel != null) {
@@ -51,7 +65,6 @@ class SaveUrlButton extends StatelessWidget {
   }
 
   void _saveUrl(BuildContext context) {
-    final repository = MangaRepository();
     controller.currentUrl().then((value) async {
       if (value != null) {
         if (mangaModel != null) {

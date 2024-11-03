@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 class MangaModel {
   final int? id;
   final String title;
@@ -96,5 +98,13 @@ class MangaModel {
       lastRead: DateTime.parse(json['lastRead']),
       fontsModelId: json['fontsModelId'],
     );
+  }
+
+  bool isUrlNull() {
+    if (urlManga == null) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }
