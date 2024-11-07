@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 class MangaModel {
   final int? id;
   final String title;

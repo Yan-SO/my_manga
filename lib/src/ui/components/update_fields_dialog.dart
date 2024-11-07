@@ -23,25 +23,25 @@ class UpdateFieldsDialog extends StatefulWidget {
 }
 
 class _UpdateFieldsDialogState extends State<UpdateFieldsDialog> {
-  late TextEditingController _tcharContr;
-  late TextEditingController _rchatContr;
+  late TextEditingController _totalChaptersController;
+  late TextEditingController _chaptersReadController;
   final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
-    _tcharContr = TextEditingController(
-      text: widget.mangaModel.totalChapters.toString(),
+    _totalChaptersController = TextEditingController(
+      text: _formatNumber(widget.mangaModel.totalChapters),
     );
-    _rchatContr = TextEditingController(
-      text: widget.mangaModel.chaptersRead.toString(),
+    _chaptersReadController = TextEditingController(
+      text: _formatNumber(widget.mangaModel.chaptersRead),
     );
   }
 
   @override
   void dispose() {
-    _tcharContr.dispose();
-    _rchatContr.dispose();
+    _totalChaptersController.dispose();
+    _chaptersReadController.dispose();
     super.dispose();
   }
 
@@ -54,103 +54,102 @@ class _UpdateFieldsDialogState extends State<UpdateFieldsDialog> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (widget.total)
-              Column(
-                children: [
-                  TextFormField(
-                    decoration:
-                        const InputDecoration(labelText: "Total de Capitulos"),
-                    keyboardType: TextInputType.number,
-                    controller: _tcharContr,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, insira o quantos capitulos tem';
-                      }
-                      if (double.tryParse(value) == null) {
-                        return "Por favor, insira um numero valido";
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  GestureDetector(
-                    onTap: () {
-                      var totalNum = double.tryParse(_tcharContr.text);
-                      if (totalNum != null) {
-                        totalNum++;
-                        _tcharContr.text = totalNum.toString();
-                      }
-                    },
-                    child: const Card(
-                      color: Color.fromARGB(255, 24, 24, 24),
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(32, 16, 32, 16),
-                        child: Text('Aumetar Totais'),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            if (widget.reads)
-              Column(
-                children: [
-                  const SizedBox(height: 32),
-                  TextFormField(
-                    decoration: const InputDecoration(
-                        labelText: "Total de Capitulos Lidos"),
-                    keyboardType: TextInputType.number,
-                    controller: _rchatContr,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, insira em qual capitulos esta';
-                      }
-                      if (double.tryParse(value) == null) {
-                        return "Por favor, insira um numero valido";
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  GestureDetector(
-                    onTap: () {
-                      var readNum = double.tryParse(_rchatContr.text);
-                      if (readNum != null) {
-                        readNum++;
-                        _rchatContr.text = readNum.toString();
-                      }
-                    },
-                    child: const Card(
-                      color: Color.fromARGB(255, 24, 24, 24),
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(32, 16, 32, 16),
-                        child: Text('Aumetar Lidos'),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            if (widget.total) _buildTotalChaptersField(),
+            if (widget.reads) _buildChaptersReadField(),
             const SizedBox(height: 32),
           ],
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              if (_formKey.currentState!.validate()) {
-                final newManga = widget.mangaModel.copyWith(
-                  totalChapters: double.parse(_tcharContr.text),
-                  chaptersRead: double.parse(_rchatContr.text),
-                  lastRead: DateTime.now(),
-                );
-                widget.repository.updateManga(newManga).then((_) {
-                  widget.onUpdate(newManga);
-                  Navigator.of(context).pop();
-                });
-              }
-            },
+            onPressed: _saveMangaUpdates,
             child: const Text('Salvar'),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildTotalChaptersField() {
+    return Column(
+      children: [
+        TextFormField(
+          style: const TextStyle(fontSize: 24),
+          decoration: const InputDecoration(labelText: "Total de Capitulos"),
+          keyboardType: TextInputType.number,
+          controller: _totalChaptersController,
+          validator: _validateNumber,
+        ),
+        const SizedBox(height: 16),
+        _buildIncrementButton("Aumentar Totais",
+            () => _incrementControllerValue(_totalChaptersController)),
+      ],
+    );
+  }
+
+  Widget _buildChaptersReadField() {
+    return Column(
+      children: [
+        const SizedBox(height: 32),
+        TextFormField(
+          style: const TextStyle(fontSize: 24),
+          decoration:
+              const InputDecoration(labelText: "Total de Capitulos Lidos"),
+          keyboardType: TextInputType.number,
+          controller: _chaptersReadController,
+          validator: _validateNumber,
+        ),
+        const SizedBox(height: 16),
+        _buildIncrementButton("Aumentar Lidos",
+            () => _incrementControllerValue(_chaptersReadController)),
+      ],
+    );
+  }
+
+  Widget _buildIncrementButton(String label, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        color: Color.fromARGB(255, 24, 24, 24),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          child: Text(label),
+        ),
+      ),
+    );
+  }
+
+  String? _validateNumber(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Por favor, insira um número';
+    }
+    if (double.tryParse(value) == null) {
+      return 'Por favor, insira um número válido';
+    }
+    return null;
+  }
+
+  void _incrementControllerValue(TextEditingController controller) {
+    final currentValue = double.tryParse(controller.text);
+    if (currentValue != null) {
+      controller.text = (currentValue + 1).toString();
+    }
+  }
+
+  void _saveMangaUpdates() {
+    if (_formKey.currentState!.validate()) {
+      final updatedManga = widget.mangaModel.copyWith(
+        totalChapters: double.parse(_totalChaptersController.text),
+        chaptersRead: double.parse(_chaptersReadController.text),
+        lastRead: DateTime.now(),
+      );
+      widget.repository.updateManga(updatedManga).then((_) {
+        widget.onUpdate(updatedManga);
+        Navigator.of(context).pop();
+      });
+    }
+  }
+
+  String _formatNumber(double number) {
+    return number % 1 == 0 ? number.toInt().toString() : number.toString();
   }
 }
