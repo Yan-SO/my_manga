@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:my_mangas/src/data/manga_repository.dart';
 import 'package:my_mangas/src/data/models/fonts_model.dart';
 import 'package:my_mangas/src/data/models/manga_model.dart';
-import 'package:my_mangas/src/ui/components/save_url_button.dart';
+
 import 'package:my_mangas/src/ui/components/update_fields_dialog.dart';
+import 'package:my_mangas/src/ui/components/url_buttons.dart';
 import 'package:my_mangas/src/ui/components/web_drawer_menu_header.dart';
 import 'package:my_mangas/src/ui/components/web_top_bar.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -118,7 +119,7 @@ class _FontsWebPageState extends State<FontsWebPage> {
                 },
               ),
             ),
-            SaveUrlButton(
+            UrlButtons(
               controller: _controller,
               fontsModel: _font,
               reloadState: () async {
