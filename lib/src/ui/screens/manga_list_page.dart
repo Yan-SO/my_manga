@@ -1,14 +1,11 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
-
 import 'package:flutter/material.dart';
 import 'package:my_mangas/src/data/manga_repository.dart';
 import 'package:my_mangas/src/data/models/manga_model.dart';
-import 'package:my_mangas/src/ui/components/home_menu.dart';
 import 'package:my_mangas/src/ui/components/item_card.dart';
 import 'package:my_mangas/src/ui/screens/manipulation_page.dart';
 
 class MangaListPage extends StatefulWidget {
-  MangaListPage({super.key});
+  const MangaListPage({super.key});
 
   @override
   State<MangaListPage> createState() => _MangaListPageState();
@@ -85,7 +82,6 @@ class _MangaListPageState extends State<MangaListPage> {
         },
         child: const Icon(Icons.add),
       ),
-      drawer: HomeMenu(context: context),
       appBar: _appBar(context),
       body: _futureBuilder(nowDate),
     );
@@ -123,7 +119,7 @@ class _MangaListPageState extends State<MangaListPage> {
       title: TextField(
         controller: _searchController,
         decoration: const InputDecoration(
-          hintText: 'Buscar...',
+          hintText: ' Buscar...',
           border: InputBorder.none,
           hintStyle: TextStyle(color: Colors.white54),
         ),

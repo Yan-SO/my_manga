@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:my_mangas/src/data/manga_repository.dart';
 import 'package:my_mangas/src/data/models/fonts_model.dart';
 import 'package:my_mangas/src/data/models/manga_model.dart';
-
 import 'package:my_mangas/src/ui/components/update_fields_dialog.dart';
 import 'package:my_mangas/src/ui/components/url_buttons.dart';
 import 'package:my_mangas/src/ui/components/web_drawer_menu_header.dart';
 import 'package:my_mangas/src/ui/components/web_top_bar.dart';
+import 'package:my_mangas/src/ui/screens/manga_web_page.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class FontsWebPage extends StatefulWidget {
@@ -100,6 +100,16 @@ class _FontsWebPageState extends State<FontsWebPage> {
                     child: ListTile(
                       onTap: () {
                         _showUpdateFieldsDialog(context, _filteredList, index);
+                      },
+                      onLongPress: () async {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MangaWebPage(
+                              manga: _filteredList[index],
+                            ),
+                          ),
+                        );
                       },
                       title: _buildTitle(index),
                       subtitle: Text(
