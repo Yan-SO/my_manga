@@ -76,7 +76,6 @@ class _FontsPageState extends State<FontsPage> {
           } else {
             return Column(
               children: [
-                SizedBox(height: 8),
                 _buildAddFonts(context),
                 SizedBox(height: 30),
                 _buildFontsTitle(),
@@ -97,13 +96,11 @@ class _FontsPageState extends State<FontsPage> {
       child: Card(
         color: Theme.of(context).colorScheme.secondary,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
           child: ListView.builder(
             itemCount: _list.length,
             itemBuilder: (context, index) {
-              return Card(
-                child: _buildListItem(context, index),
-              );
+              return _buildListItem(context, index);
             },
           ),
         ),
@@ -111,49 +108,59 @@ class _FontsPageState extends State<FontsPage> {
     );
   }
 
-  ListTile _buildListItem(BuildContext context, int index) {
-    return ListTile(
-      onLongPress: () {
-        _font = _list[index];
-        _nameFontController.text = _font!.fontName;
-        if (_font!.imgUrl != null) _setStringImageManga(_font!.imgUrl!);
-        setState(() {
-          _edit = true;
-        });
-        if (_font!.imgUrl != null) {
-          _setImage(File(_font!.imgUrl!));
-        }
-      },
-      onTap: () async {
-        await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => FontsWebPage(
-              font: _list[index],
-            ),
-          ),
-        );
-        _loadFonts();
-      },
-      trailing: IconButton(
-        icon: Icon(Icons.delete_outlined),
-        onPressed: () async {
-          if (_list[index].id != null) {
-            await _confirmDeleteAlert.deletefont(_list[index], context);
-            _loadFonts();
-          } else {
-            AlertDialog(
-              title: Text('o ${_list[index].fontName} não tem um id'),
-            );
+  Widget _buildListItem(BuildContext context, int index) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        side: BorderSide(
+          width: 0.1,
+          color: Theme.of(context).colorScheme.onSecondary,
+        ),
+      ),
+      color: Theme.of(context).colorScheme.secondary,
+      child: ListTile(
+        onLongPress: () {
+          _font = _list[index];
+          _nameFontController.text = _font!.fontName;
+          if (_font!.imgUrl != null) _setStringImageManga(_font!.imgUrl!);
+          setState(() {
+            _edit = true;
+          });
+          if (_font!.imgUrl != null) {
+            _setImage(File(_font!.imgUrl!));
           }
         },
-      ),
-      leading: _list[index].imgUrl != null
-          ? CircleAvatar(backgroundImage: FileImage(File(_list[index].imgUrl!)))
-          : CircleAvatar(
-              backgroundColor: Colors.black,
+        onTap: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => FontsWebPage(
+                font: _list[index],
+              ),
             ),
-      title: Text(_list[index].fontName),
+          );
+          _loadFonts();
+        },
+        trailing: IconButton(
+          icon: Icon(Icons.delete_outlined),
+          onPressed: () async {
+            if (_list[index].id != null) {
+              await _confirmDeleteAlert.deletefont(_list[index], context);
+              _loadFonts();
+            } else {
+              AlertDialog(
+                title: Text('o ${_list[index].fontName} não tem um id'),
+              );
+            }
+          },
+        ),
+        leading: _list[index].imgUrl != null
+            ? CircleAvatar(
+                backgroundImage: FileImage(File(_list[index].imgUrl!)))
+            : CircleAvatar(
+                backgroundColor: Colors.black,
+              ),
+        title: Text(_list[index].fontName),
+      ),
     );
   }
 

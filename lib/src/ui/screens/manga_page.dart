@@ -117,7 +117,7 @@ class _MangaPageState extends State<MangaPage> {
     final chaptersToRead = manga!.totalChapters - manga!.chaptersRead;
 
     return Scaffold(
-      appBar: _buildAppBar(context),
+      appBar: AppBar(backgroundColor: Theme.of(context).colorScheme.secondary),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -130,33 +130,6 @@ class _MangaPageState extends State<MangaPage> {
             _buildUrlText(),
           ],
         ),
-      ),
-    );
-  }
-
-  AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
-      backgroundColor: Theme.of(context).colorScheme.secondary,
-      title: Row(
-        children: [
-          const Spacer(),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (BuildContext context) {
-                  return ManipulationPage(
-                    dateNow: DateTime.now(),
-                    manga: manga,
-                  );
-                }),
-              ).then((_) {
-                _updateManga(manga!.id!);
-              });
-            },
-          ),
-        ],
       ),
     );
   }

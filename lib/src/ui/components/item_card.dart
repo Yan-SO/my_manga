@@ -32,6 +32,11 @@ class ItemCardManga extends StatelessWidget {
         findMangas();
       },
       child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(
+              width: 0.5, color: Theme.of(context).colorScheme.onSecondary),
+        ),
         color: Theme.of(context).colorScheme.secondary,
         child: Padding(
           padding: const EdgeInsets.all(12.0),
