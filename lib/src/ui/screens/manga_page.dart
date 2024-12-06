@@ -1,15 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:my_mangas/src/data/manga_repository.dart';
 import 'package:my_mangas/src/data/models/fonts_model.dart';
 import 'package:my_mangas/src/data/models/manga_model.dart';
 import 'package:my_mangas/src/ui/components/confirm_delete_alert.dart';
-import 'package:my_mangas/src/ui/components/piker_image.dart';
+import 'package:my_mangas/src/ui/components/manga_header.dart';
 import 'package:my_mangas/src/ui/screens/fonts_web_page.dart';
 import 'package:my_mangas/src/ui/screens/manga_web_page.dart';
-import 'package:my_mangas/src/ui/screens/manipulation_page.dart';
 
 class MangaPage extends StatefulWidget {
   final DateTime nowDate;
@@ -47,7 +45,11 @@ class _MangaPageState extends State<MangaPage> {
         await _loadFonts();
       }
     } catch (e) {
-      _showErrorDialog('Erro ao carregar o manga: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erro ao carregar o manga'),
+        ),
+      );
     }
   }
 
@@ -79,26 +81,6 @@ class _MangaPageState extends State<MangaPage> {
     });
   }
 
-  void _setImage(File image) {
-    _repository.updateManga(manga!.copyWith(imgUrl: image.path));
-  }
-
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Erro'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     if (manga == null) {
@@ -112,60 +94,25 @@ class _MangaPageState extends State<MangaPage> {
       );
     }
 
-    final widthScreen = MediaQuery.of(context).size.width;
     final daysSinceLastRead = widget.nowDate.difference(manga!.lastRead).inDays;
     final chaptersToRead = manga!.totalChapters - manga!.chaptersRead;
 
     return Scaffold(
       appBar: AppBar(backgroundColor: Theme.of(context).colorScheme.secondary),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            _buildMangaHeader(widthScreen),
-            const Spacer(),
-            _buildMangaInfo(chaptersToRead, daysSinceLastRead),
-            const Spacer(flex: 4),
-            _buildReadButton(),
-            _buildUrlText(),
-          ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              MangaHeader(mangaId: widget.mangaId),
+              const SizedBox(height: 32),
+              _buildMangaInfo(chaptersToRead, daysSinceLastRead),
+              const SizedBox(height: 80),
+              _buildReadButton(),
+            ],
+          ),
         ),
       ),
-    );
-  }
-
-  Widget _buildMangaHeader(double widthScreen) {
-    return Row(
-      children: [
-        SizedBox(
-          height: widthScreen * 2 / 3,
-          width: widthScreen * 2 / 5,
-          child: PikerImage(
-            onImagePicked: _setImage,
-            imageManga: manga?.imgUrl,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: GestureDetector(
-            onLongPress: () async {
-              await Clipboard.setData(ClipboardData(text: manga!.title));
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                content: Text('Texto copiado!'),
-              ));
-            },
-            child: Text(
-              manga!.title,
-              maxLines: 7,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -287,13 +234,6 @@ class _MangaPageState extends State<MangaPage> {
           fontSize: 24,
         ),
       ),
-    );
-  }
-
-  Widget _buildUrlText() {
-    return Text(
-      'URL atual: ${manga!.urlManga}',
-      maxLines: 2,
     );
   }
 

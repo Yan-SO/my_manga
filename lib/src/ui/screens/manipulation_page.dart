@@ -7,6 +7,8 @@ import 'package:my_mangas/src/ui/components/piker_image.dart';
 import 'package:my_mangas/src/ui/components/show_custom_alert.dart';
 import 'package:my_mangas/src/ui/screens/manga_page.dart';
 
+// atualizar para so criar o manga
+
 class ManipulationPage extends StatefulWidget {
   final MangaModel? manga;
   final DateTime dateNow;
