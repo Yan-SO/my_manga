@@ -23,6 +23,11 @@ class _MangaListPageState extends State<MangaListPage> {
   void initState() {
     super.initState();
     _findMangas();
+    _mangaRepository.dbChanges.listen((_) {
+      if (mounted) {
+        _findMangas();
+      }
+    });
     _searchController.addListener(() {
       _filterMangas(_searchController.text);
     });
@@ -34,6 +39,7 @@ class _MangaListPageState extends State<MangaListPage> {
       _filterMangas(_searchController.text);
     });
     _searchController.dispose();
+    _mangaRepository.dbChanges.drain();
     super.dispose();
   }
 
@@ -78,7 +84,6 @@ class _MangaListPageState extends State<MangaListPage> {
               builder: (context) => ManipulationPage(dateNow: nowDate),
             ),
           );
-          _findMangas();
         },
         child: const Icon(Icons.add),
       ),
@@ -104,7 +109,6 @@ class _MangaListPageState extends State<MangaListPage> {
               return ItemCardManga(
                 manga: _filteredMangas[index],
                 nowDate: nowDate,
-                findMangas: _findMangas,
               );
             },
           );

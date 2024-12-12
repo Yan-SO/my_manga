@@ -7,13 +7,11 @@ import 'package:my_mangas/src/ui/screens/manga_page.dart';
 class ItemCardManga extends StatelessWidget {
   final MangaModel manga;
   final DateTime nowDate;
-  final VoidCallback findMangas;
 
   const ItemCardManga({
     super.key,
     required this.manga,
     required this.nowDate,
-    required this.findMangas,
   });
 
   @override
@@ -29,7 +27,6 @@ class ItemCardManga extends StatelessWidget {
                 MangaPage(mangaId: manga.id!, nowDate: nowDate),
           ),
         );
-        findMangas();
       },
       child: Card(
         shape: RoundedRectangleBorder(

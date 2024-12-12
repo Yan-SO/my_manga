@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:my_mangas/src/data/database_helper.dart';
 import 'package:my_mangas/src/data/models/fonts_model.dart';
 import 'package:my_mangas/src/data/models/manga_model.dart';
@@ -5,12 +7,24 @@ import 'package:my_mangas/src/data/models/tegs_model.dart';
 import 'package:sqflite/sqflite.dart';
 
 class MangaRepository {
+  MangaRepository._privateConstructor();
+  static final MangaRepository _instance =
+      MangaRepository._privateConstructor();
+
+  factory MangaRepository() {
+    return _instance;
+  }
+
   final DatabaseHelper _databaseHelper = DatabaseHelper();
+  final StreamController<void> _dbChangeController =
+      StreamController.broadcast();
+  Stream<void> get dbChanges => _dbChangeController.stream;
 
   // Métodos para manga
 
   Future<int> insertManga(MangaModel manga) async {
     final db = await _databaseHelper.database;
+    _dbChangeController.add(null);
     return await db.insert(
       'manga',
       manga.toJson(),
@@ -61,6 +75,8 @@ class MangaRepository {
       where: 'id = ?',
       whereArgs: [manga.id],
     );
+    print('object ${manga.title}');
+    _dbChangeController.add(null);
   }
 
   Future<void> deleteManga(int id) async {
@@ -70,12 +86,14 @@ class MangaRepository {
       where: 'id = ?',
       whereArgs: [id],
     );
+    _dbChangeController.add(null);
   }
 
   //  Métodos para FontsModel
 
   Future<int> insertFont(FontsModel font) async {
     final db = await _databaseHelper.database;
+    _dbChangeController.add(null);
     return db.insert(
       'fonts',
       font.toJson(),
@@ -121,17 +139,20 @@ class MangaRepository {
       where: 'id = ?',
       whereArgs: [font.id],
     );
+    _dbChangeController.add(null);
   }
 
-  Future<void> deletefonts(int id) async {
+  Future<void> _deletefonts(int id) async {
     final db = await _databaseHelper.database;
     await db.delete('fonts', where: 'id = ?', whereArgs: [id]);
+    _dbChangeController.add(null);
   }
 
   //  Métodos para TegsModel
 
   Future<int> insertTeg(TegsModel teg) async {
     final db = await _databaseHelper.database;
+    _dbChangeController.add(null);
     return db.insert(
       'tegs',
       teg.toJson(),
@@ -142,11 +163,13 @@ class MangaRepository {
   Future<void> updateTeg(TegsModel teg) async {
     final db = await _databaseHelper.database;
     await db.update('tegs', teg.toJson(), where: 'id = ?', whereArgs: [teg.id]);
+    _dbChangeController.add(null);
   }
 
   Future<void> deleteTeg(int id) async {
     final db = await _databaseHelper.database;
     await db.delete('tegs', where: 'id = ?', whereArgs: [id]);
+    _dbChangeController.add(null);
   }
 
   // Métodos para gerenciar a relação entre Manga e Tegs
@@ -157,6 +180,7 @@ class MangaRepository {
       "manga_tegs",
       {'mangaId': mangaId, 'tegId': tegId},
     );
+    _dbChangeController.add(null);
   }
 
   Future<List<TegsModel>> getTegsForManga(int mangaId) async {
@@ -230,6 +254,6 @@ class MangaRepository {
       await unlinkFontInManga(manga, font);
     });
 
-    await deletefonts(font.id!);
+    await _deletefonts(font.id!);
   }
 }
