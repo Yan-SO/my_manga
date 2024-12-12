@@ -10,7 +10,7 @@ import 'package:my_mangas/src/ui/components/piker_image.dart';
 import 'package:my_mangas/src/ui/screens/fonts_web_page.dart';
 
 class FontsPage extends StatefulWidget {
-  FontsPage({super.key});
+  const FontsPage({super.key});
 
   @override
   State<FontsPage> createState() => _FontsPageState();
@@ -97,11 +97,13 @@ class _FontsPageState extends State<FontsPage> {
         color: Theme.of(context).colorScheme.secondary,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
-          child: ListView.builder(
-            itemCount: _list.length,
-            itemBuilder: (context, index) {
-              return _buildListItem(context, index);
-            },
+          child: Scrollbar(
+            child: ListView.builder(
+              itemCount: _list.length,
+              itemBuilder: (context, index) {
+                return _buildListItem(context, index);
+              },
+            ),
           ),
         ),
       ),

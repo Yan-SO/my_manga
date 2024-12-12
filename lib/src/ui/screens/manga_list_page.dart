@@ -103,14 +103,16 @@ class _MangaListPageState extends State<MangaListPage> {
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const Center(child: Text('Adicione um novo manga!'));
         } else {
-          return ListView.builder(
-            itemCount: _filteredMangas.length,
-            itemBuilder: (context, index) {
-              return ItemCardManga(
-                manga: _filteredMangas[index],
-                nowDate: nowDate,
-              );
-            },
+          return Scrollbar(
+            child: ListView.builder(
+              itemCount: _filteredMangas.length,
+              itemBuilder: (context, index) {
+                return ItemCardManga(
+                  manga: _filteredMangas[index],
+                  nowDate: nowDate,
+                );
+              },
+            ),
           );
         }
       },
