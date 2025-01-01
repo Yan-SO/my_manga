@@ -27,8 +27,23 @@ class _MangaWebPageState extends State<MangaWebPage> {
   void initState() {
     super.initState();
     _mangaModel = widget.manga;
+    _initializeWebViewController();
+  }
+
+  void _initializeWebViewController() {
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onNavigationRequest: (request) {
+            if (!request.url.startsWith("http")) {
+              print("Tentativa bloqueada: ${request.url}");
+              return NavigationDecision.prevent;
+            }
+            return NavigationDecision.navigate;
+          },
+        ),
+      )
       ..loadRequest(
         Uri.parse(_mangaModel.urlManga ?? "https://www.google.com.br/"),
       );
