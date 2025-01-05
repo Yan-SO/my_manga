@@ -6,7 +6,7 @@ import 'package:my_mangas/src/data/models/manga_model.dart';
 import 'package:my_mangas/src/ui/components/url_buttons.dart';
 import 'package:my_mangas/src/ui/components/web_drawer_menu_header.dart';
 import 'package:my_mangas/src/ui/components/update_fields_dialog.dart';
-import 'package:my_mangas/src/ui/components/web_top_bar.dart';
+import 'package:my_mangas/src/ui/components/web_top_navigation_bar.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class MangaWebPage extends StatefulWidget {
@@ -33,17 +33,6 @@ class _MangaWebPageState extends State<MangaWebPage> {
   void _initializeWebViewController() {
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onNavigationRequest: (request) {
-            if (!request.url.startsWith("http")) {
-              print("Tentativa bloqueada: ${request.url}");
-              return NavigationDecision.prevent;
-            }
-            return NavigationDecision.navigate;
-          },
-        ),
-      )
       ..loadRequest(
         Uri.parse(_mangaModel.urlManga ?? "https://www.google.com.br/"),
       );
@@ -54,7 +43,7 @@ class _MangaWebPageState extends State<MangaWebPage> {
     final title = _mangaModel.title;
     return Scaffold(
       endDrawer: _webViewMenu(title, _controller),
-      appBar: WebTopBar(controller: _controller, title: title),
+      appBar: WebTopNavigationBar(controller: _controller),
       body: WebViewWidget(
         controller: _controller,
       ),

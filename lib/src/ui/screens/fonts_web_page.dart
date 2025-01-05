@@ -6,7 +6,7 @@ import 'package:my_mangas/src/data/models/manga_model.dart';
 import 'package:my_mangas/src/ui/components/update_fields_dialog.dart';
 import 'package:my_mangas/src/ui/components/url_buttons.dart';
 import 'package:my_mangas/src/ui/components/web_drawer_menu_header.dart';
-import 'package:my_mangas/src/ui/components/web_top_bar.dart';
+import 'package:my_mangas/src/ui/components/web_top_navigation_bar.dart';
 import 'package:my_mangas/src/ui/screens/manga_web_page.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -206,7 +206,7 @@ class _FontsWebPageState extends State<FontsWebPage> {
     final width = MediaQuery.of(context).size.width;
     return Scaffold(
       endDrawer: _buildWebFontMenu(width, context),
-      appBar: WebTopBar(controller: _controller, title: widget.font.fontName),
+      appBar: WebTopNavigationBar(controller: _controller),
       body: WebViewWidget(controller: _controller),
     );
   }

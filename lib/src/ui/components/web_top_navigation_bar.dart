@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-class WebTopBar extends StatefulWidget implements PreferredSizeWidget {
-  const WebTopBar({super.key, required this.controller, required this.title});
+class WebTopNavigationBar extends StatefulWidget
+    implements PreferredSizeWidget {
+  const WebTopNavigationBar({
+    super.key,
+    required this.controller,
+  });
 
   final WebViewController controller;
-  final String title;
 
   @override
-  State<WebTopBar> createState() => _WebTopBarState();
+  State<WebTopNavigationBar> createState() => _WebTopNavigationBarState();
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
 
-class _WebTopBarState extends State<WebTopBar> {
+class _WebTopNavigationBarState extends State<WebTopNavigationBar> {
   final ValueNotifier<int> _progressNotifier = ValueNotifier<int>(0);
+  String _title = "Loading...";
 
   @override
   void initState() {
@@ -25,8 +29,29 @@ class _WebTopBarState extends State<WebTopBar> {
         onProgress: (int progress) {
           _progressNotifier.value = progress;
         },
+        onNavigationRequest: (request) {
+          if (!request.url.startsWith("http")) {
+            print("Tentativa bloqueada: ${request.url}");
+            return NavigationDecision.prevent;
+          }
+          return NavigationDecision.navigate;
+        },
+        onPageStarted: (url) {
+          _updateTitle();
+        },
+        onPageFinished: (url) {
+          _updateTitle();
+        },
       ),
     );
+    _updateTitle();
+  }
+
+  Future<void> _updateTitle() async {
+    final url = await widget.controller.currentUrl();
+    setState(() {
+      _title = url ?? "No URL";
+    });
   }
 
   @override
@@ -43,7 +68,7 @@ class _WebTopBarState extends State<WebTopBar> {
         children: [
           Expanded(
             child: Text(
-              widget.title,
+              _title ?? "",
               style: const TextStyle(fontSize: 14),
               overflow: TextOverflow.ellipsis,
               maxLines: 2,
