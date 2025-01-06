@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_mangas/src/ui/components/show_custom_alert.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WebTopNavigationBar extends StatefulWidget
@@ -29,12 +30,12 @@ class _WebTopNavigationBarState extends State<WebTopNavigationBar> {
         onProgress: (int progress) {
           _progressNotifier.value = progress;
         },
-        onNavigationRequest: (request) {
-          if (!request.url.startsWith("http")) {
-            print("Tentativa bloqueada: ${request.url}");
-            return NavigationDecision.prevent;
+        onNavigationRequest: (request) async {
+          if (await _isSameSite(currentUrl: _title, nextUrl: request.url)) {
+            return NavigationDecision.navigate;
           }
-          return NavigationDecision.navigate;
+          print("Tentativa bloqueada: ${request.url}");
+          return NavigationDecision.prevent;
         },
         onPageStarted: (url) {
           _updateTitle();
@@ -45,6 +46,23 @@ class _WebTopNavigationBarState extends State<WebTopNavigationBar> {
       ),
     );
     _updateTitle();
+  }
+
+  Future<bool> _isSameSite(
+      {required String? currentUrl, required String? nextUrl}) async {
+    final currentUri = Uri.tryParse(currentUrl ?? "");
+    final nextUri = Uri.tryParse(nextUrl ?? "");
+    if (currentUri?.host == nextUri?.host) {
+      return true;
+    }
+    final resp = await showCustomAlert(
+      context,
+      title: "Mudar de site?",
+      message:
+          "Tem certeza de que deseja ir para o site ${nextUri?.host ?? "este site, que não possui um host"}?",
+      showConfirm: true,
+    );
+    return resp ?? false;
   }
 
   Future<void> _updateTitle() async {
@@ -68,7 +86,7 @@ class _WebTopNavigationBarState extends State<WebTopNavigationBar> {
         children: [
           Expanded(
             child: Text(
-              _title ?? "",
+              _title,
               style: const TextStyle(fontSize: 14),
               overflow: TextOverflow.ellipsis,
               maxLines: 2,
