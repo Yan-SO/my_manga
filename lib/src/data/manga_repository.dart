@@ -256,4 +256,28 @@ class MangaRepository {
 
     await _deletefonts(font.id!);
   }
+
+//metodos de confuguraçoes
+  Future<void> saveSetting(String key, String value) async {
+    final db = await _databaseHelper.database;
+    await db.insert(
+      'settings',
+      {'key': key, 'value': value},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<String?> getSetting(String key) async {
+    final db = await _databaseHelper.database;
+    final result = await db.query(
+      'settings',
+      where: 'key = ?',
+      whereArgs: [key],
+      limit: 1,
+    );
+    if (result.isNotEmpty) {
+      return result.first['value'] as String?;
+    }
+    return null;
+  }
 }

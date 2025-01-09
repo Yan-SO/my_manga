@@ -15,16 +15,21 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
+    print('Initializing database...');
     String path = join(await getDatabasesPath(), 'app_database.db');
-    return await openDatabase(
+    final db = await openDatabase(
       path,
-      version: 2,
+      version: 5,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
+    final version = await db.getVersion();
+    print('Current database version: $version');
+    return db;
   }
 
   Future<void> _onCreate(Database db, int version) async {
+    print('Creating database version $version');
     await db.execute('''
       CREATE TABLE manga (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -62,9 +67,20 @@ class DatabaseHelper {
         FOREIGN KEY (tegId) REFERENCES tegs (id)
       )
     ''');
+    await db.execute('''
+  CREATE TABLE settings (
+    key TEXT PRIMARY KEY,
+    value TEXT
+  )
+''');
+    await db.insert('settings', {
+      'key': 'showNavigationQuest',
+      'value': 'true',
+    });
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    print('Upgrading database from version $oldVersion to $newVersion');
     if (oldVersion < 2) {
       await db.execute('''
         CREATE TABLE fonts (
@@ -78,6 +94,19 @@ class DatabaseHelper {
       await db.execute('''
         ALTER TABLE manga ADD COLUMN fontsModelId INTEGER;
       ''');
+    }
+
+    if (oldVersion < 5) {
+      await db.execute('''
+    CREATE TABLE settings (
+      key TEXT PRIMARY KEY,
+      value TEXT
+    )
+  ''');
+      await db.insert('settings', {
+        'key': 'showNavigationQuest',
+        'value': 'true',
+      });
     }
   }
 }

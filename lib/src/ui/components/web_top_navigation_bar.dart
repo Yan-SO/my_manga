@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_mangas/src/data/manga_repository.dart';
 import 'package:my_mangas/src/ui/components/show_custom_alert.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -20,6 +21,7 @@ class WebTopNavigationBar extends StatefulWidget
 
 class _WebTopNavigationBarState extends State<WebTopNavigationBar> {
   final ValueNotifier<int> _progressNotifier = ValueNotifier<int>(0);
+  final MangaRepository _repository = MangaRepository();
   String _title = "Loading...";
 
   @override
@@ -31,11 +33,13 @@ class _WebTopNavigationBarState extends State<WebTopNavigationBar> {
           _progressNotifier.value = progress;
         },
         onNavigationRequest: (request) async {
-          if (await _isSameSite(currentUrl: _title, nextUrl: request.url)) {
-            return NavigationDecision.navigate;
+          if (await _repository.getSetting('showNavigationQuest') == 'true') {
+            if (!await _isSameSite(currentUrl: _title, nextUrl: request.url)) {
+              print("Tentativa bloqueada: ${request.url}");
+              return NavigationDecision.prevent;
+            }
           }
-          print("Tentativa bloqueada: ${request.url}");
-          return NavigationDecision.prevent;
+          return NavigationDecision.navigate;
         },
         onPageStarted: (url) {
           _updateTitle();

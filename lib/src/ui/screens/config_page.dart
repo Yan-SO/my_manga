@@ -1,13 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:my_mangas/src/data/backup_manager.dart';
+import 'package:my_mangas/src/data/manga_repository.dart';
 import 'package:my_mangas/src/ui/components/show_custom_alert.dart';
 
-class ConfigPage extends StatelessWidget {
+class ConfigPage extends StatefulWidget {
   const ConfigPage({super.key});
+
+  @override
+  State<ConfigPage> createState() => _ConfigPageState();
+}
+
+class _ConfigPageState extends State<ConfigPage> {
+  bool showNavigationQuest = true;
+  final MangaRepository _repository = MangaRepository();
+
+  @override
+  void initState() {
+    super.initState();
+    _getShowNavigationQuest();
+  }
+
+  void _getShowNavigationQuest() async {
+    final temp = await _repository.getSetting('showNavigationQuest');
+    if (temp == 'false') {
+      showNavigationQuest = false;
+    } else {
+      showNavigationQuest = true;
+    }
+    print('$showNavigationQuest - $temp');
+  }
+
+  Future<void> _setShowNavigationQuest(bool newValue) async {
+    await _repository.saveSetting('showNavigationQuest', "$newValue");
+  }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: _buildAppBar(context, colorScheme),
       body: ListView(
@@ -41,6 +71,18 @@ class ConfigPage extends StatelessWidget {
               );
             },
           ),
+          _buildElementTitle(text: "Navegação web"),
+          _buildCheckbox(
+              text: 'Perguntar se deseja trocar de site',
+              onChanged: (temp) async {
+                if (temp != null) {
+                  await _setShowNavigationQuest(temp);
+                  setState(() {
+                    showNavigationQuest = temp;
+                  });
+                }
+              },
+              checkboxValue: showNavigationQuest)
         ],
       ),
     );
@@ -48,13 +90,36 @@ class ConfigPage extends StatelessWidget {
 
   Padding _buildElementTitle({required String text}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      padding: const EdgeInsets.fromLTRB(22, 22, 8, 8),
       child: Text(
         text,
         style: const TextStyle(
           fontWeight: FontWeight.bold,
-          fontSize: 18,
+          fontSize: 20,
         ),
+      ),
+    );
+  }
+
+  Widget _buildCheckbox({
+    required String text,
+    required void Function(bool?)? onChanged,
+    required bool? checkboxValue,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        children: [
+          Text(
+            text,
+            style: const TextStyle(fontSize: 15),
+          ),
+          const Spacer(),
+          Checkbox(
+            value: checkboxValue,
+            onChanged: onChanged,
+          ),
+        ],
       ),
     );
   }
@@ -72,7 +137,10 @@ class ConfigPage extends StatelessWidget {
         backgroundColor: WidgetStateProperty.all<Color>(colorScheme.secondary),
       ),
       onPressed: onPressed,
-      child: Text(text),
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 15),
+      ),
     );
   }
 
